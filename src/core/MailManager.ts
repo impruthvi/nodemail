@@ -11,6 +11,8 @@ import type {
   MailerConfig,
 } from '../types';
 import { SmtpProvider } from '../providers/SmtpProvider';
+import { SendGridProvider } from '../providers/SendGridProvider';
+import { SesProvider } from '../providers/SesProvider';
 
 export class MailManager {
   private config: MailConfig;
@@ -28,13 +30,9 @@ export class MailManager {
       case 'smtp':
         return new SmtpProvider(mailerConfig as import('../types').SmtpConfig);
       case 'sendgrid':
-        throw new Error(
-          'SendGrid provider not yet implemented. Install @sendgrid/mail and enable the provider.'
-        );
+        return new SendGridProvider(mailerConfig as import('../types').SendGridConfig);
       case 'ses':
-        throw new Error(
-          'AWS SES provider not yet implemented. Install @aws-sdk/client-ses and enable the provider.'
-        );
+        return new SesProvider(mailerConfig as import('../types').SesConfig);
       default:
         throw new Error(`Unsupported mail driver: ${mailerConfig.driver}`);
     }

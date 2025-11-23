@@ -10,6 +10,8 @@ export { Message } from './core/Message';
 
 // Providers
 export { SmtpProvider } from './providers/SmtpProvider';
+export { SendGridProvider } from './providers/SendGridProvider';
+export { SesProvider } from './providers/SesProvider';
 
 // Types
 export * from './types';
