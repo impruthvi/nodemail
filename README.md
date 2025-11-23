@@ -57,7 +57,71 @@ npm install resend
 npm install postmark
 ```
 
-## 🚀 Quick Example (Planned API)
+## 🚀 Quick Start
+
+**Basic usage (works now):**
+
+```typescript
+import { Mail } from 'nodemail';
+
+// Configure once
+Mail.configure({
+  default: 'smtp',
+  from: {
+    address: 'noreply@example.com',
+    name: 'My App',
+  },
+  mailers: {
+    smtp: {
+      driver: 'smtp',
+      host: process.env.SMTP_HOST,
+      port: 587,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    },
+  },
+});
+
+// Send emails
+await Mail.to('user@example.com')
+  .subject('Welcome!')
+  .html('<h1>Hello World!</h1>')
+  .send();
+```
+
+**Advanced usage (coming soon):**
+
+```typescript
+import { Mail } from 'nodemail';
+
+// Configure once
+Mail.configure({
+  default: 'smtp',
+  from: {
+    address: 'noreply@example.com',
+    name: 'My App',
+  },
+  mailers: {
+    smtp: {
+      driver: 'smtp',
+      host: process.env.MAIL_HOST,
+      port: 587,
+      username: process.env.MAIL_USERNAME,
+      password: process.env.MAIL_PASSWORD,
+    },
+  },
+});
+
+// Send emails
+await Mail.to('user@example.com')
+  .subject('Welcome!')
+  .html('<h1>Hello World!</h1>')
+  .send();
+```
+
+**Advanced usage (coming soon):**
 
 ```typescript
 import { Mail } from 'nodemail';
@@ -112,14 +176,18 @@ await Mail.to('user@example.com').send(new WelcomeEmail(user));
 - Core type definitions
 - Lightweight architecture (peerDependencies)
 
-**Phase 2: Core Implementation** 🚧 Next
-- Mail Manager & Facade
-- Provider implementations (SMTP, SendGrid, SES, etc.)
-- Mailable base classes
-- Configuration system
-- Message builder
+**Phase 2: Core Implementation** ✅ Complete (SMTP)
+- ✅ Mail Manager & Facade
+- ✅ SMTP Provider (nodemailer)
+- ✅ Message builder with fluent API
+- ✅ Configuration system
+- ✅ Error handling
+- 🚧 SendGrid provider (next)
+- 🚧 AWS SES provider (next)
+- 🚧 Other providers (Mailgun, Resend, etc.)
 
 **Phase 3+: Advanced Features** 📋 Planned
+- Mailable classes (enhancement)
 - Notification system
 - Queue integration  
 - Template engines

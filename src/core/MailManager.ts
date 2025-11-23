@@ -3,15 +3,66 @@
  * Manages multiple mail configurations (SMTP, SendGrid, etc.)
  */
 
-import type { MailConfig, MailOptions } from '../types';
+import type {
+  MailConfig,
+  MailOptions,
+  MailProvider,
+  MailResponse,
+  MailerConfig,
+} from '../types';
+import { SmtpProvider } from '../providers/SmtpProvider';
 
 export class MailManager {
   private config: MailConfig;
-  // TODO: Phase 3 - Use this to cache provider instances
-  // private providers: Map<string, any> = new Map();
+  private providers: Map<string, MailProvider> = new Map();
 
   constructor(config: MailConfig) {
     this.config = config;
+  }
+
+  /**
+   * Create a provider instance based on configuration
+   */
+  private createProvider(mailerConfig: MailerConfig): MailProvider {
+    switch (mailerConfig.driver) {
+      case 'smtp':
+        return new SmtpProvider(mailerConfig as import('../types').SmtpConfig);
+      case 'sendgrid':
+        throw new Error(
+          'SendGrid provider not yet implemented. Install @sendgrid/mail and enable the provider.'
+        );
+      case 'ses':
+        throw new Error(
+          'AWS SES provider not yet implemented. Install @aws-sdk/client-ses and enable the provider.'
+        );
+      default:
+        throw new Error(`Unsupported mail driver: ${mailerConfig.driver}`);
+    }
+  }
+
+  /**
+   * Get or create a provider instance
+   */
+  private getProvider(name?: string): MailProvider {
+    const mailerName = name ?? this.config.default;
+
+    if (!this.config.mailers[mailerName]) {
+      throw new Error(`Mailer '${mailerName}' is not configured`);
+    }
+
+    // Check cache first
+    let provider = this.providers.get(mailerName);
+    if (!provider) {
+      // Create and cache new provider
+      const mailerConfig = this.config.mailers[mailerName];
+      if (!mailerConfig) {
+        throw new Error(`Mailer '${mailerName}' configuration not found`);
+      }
+      provider = this.createProvider(mailerConfig);
+      this.providers.set(mailerName, provider);
+    }
+
+    return provider;
   }
 
   /**
@@ -29,17 +80,17 @@ export class MailManager {
       throw new Error(`Mailer '${name}' is not configured`);
     }
 
-    // TODO: Phase 3 - Create actual provider instances
-    return this;
+    // Return a new manager instance that uses this specific mailer as default
+    const newConfig = { ...this.config, default: name };
+    return new MailManager(newConfig);
   }
 
   /**
    * Send an email using the default mailer
    */
-  send(options: MailOptions): void {
-    // TODO: Phase 3 - Implement actual sending
-    // eslint-disable-next-line no-console
-    console.log('Sending email:', options);
+  async send(options: MailOptions): Promise<MailResponse> {
+    const provider = this.getProvider();
+    return provider.send(options);
   }
 
   /**
@@ -83,11 +134,11 @@ export class MessageBuilder {
     return this;
   }
 
-  send(): void {
+  async send(): Promise<MailResponse> {
     if (!this.options.subject) {
       throw new Error('Email subject is required');
     }
 
-    this.manager.send(this.options as MailOptions);
+    return this.manager.send(this.options as MailOptions);
   }
 }

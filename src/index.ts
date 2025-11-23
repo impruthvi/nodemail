@@ -8,6 +8,9 @@ export { MailManager } from './core/MailManager';
 export { Mailable } from './core/Mailable';
 export { Message } from './core/Message';
 
+// Providers
+export { SmtpProvider } from './providers/SmtpProvider';
+
 // Types
 export * from './types';
 

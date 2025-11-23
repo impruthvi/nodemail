@@ -24,6 +24,11 @@ export interface SmtpConfig extends MailerConfig {
   password?: string;
   encryption?: 'tls' | 'ssl';
   secure?: boolean;
+  auth?: {
+    user: string;
+    pass: string;
+  };
+  options?: Record<string, unknown>;
 }
 
 export interface SendGridConfig extends MailerConfig {
@@ -94,8 +99,10 @@ export interface MailProvider {
 }
 
 export interface MailResponse {
-  messageId: string;
+  success: boolean;
+  messageId?: string;
   accepted?: string[];
   rejected?: string[];
   response?: string;
+  error?: string;
 }
