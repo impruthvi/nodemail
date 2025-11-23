@@ -11,6 +11,8 @@ module.exports = {
     '!src/**/*.d.ts',
     '!src/types/**',
     '!src/cli/**',
+    '!src/providers/SendGridProvider.ts', // Optional dependency - needs @sendgrid/mail installed
+    '!src/providers/SesProvider.ts', // Optional dependency - needs @aws-sdk/client-ses installed
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],

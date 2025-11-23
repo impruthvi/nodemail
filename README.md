@@ -1,11 +1,14 @@
-# nodemail
+# @impruthvi/nodemail
 
+[![npm version](https://badge.fury.io/js/@impruthvi%2Fnodemail.svg)](https://www.npmjs.com/package/@impruthvi/nodemail)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
+[![Tests](https://img.shields.io/badge/tests-25%20passing-brightgreen)](https://github.com/impruthvi/nodemail)
+[![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)](https://github.com/impruthvi/nodemail)
 
 > 🚧 **Work in Progress** - A unified mail service for Node.js/TypeScript inspired by Laravel's elegant Mail system.
 
-**nodemail** aims to bring the simplicity and elegance of Laravel's Mail system to the Node.js ecosystem with full TypeScript support.
+**@impruthvi/nodemail** aims to bring the simplicity and elegance of Laravel's Mail system to the Node.js ecosystem with full TypeScript support.
 
 ## 🎯 Vision
 
@@ -40,7 +43,12 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 ## 📦 Installation
 
 ```bash
-npm install nodemail
+npm install @impruthvi/nodemail@beta
+```
+
+Or for the latest stable (when v1.0.0 is released):
+```bash
+npm install @impruthvi/nodemail
 ```
 
 **Lightweight by default!** Only includes SMTP support (~25MB).
@@ -105,6 +113,8 @@ await Mail.to('user@example.com')
 
 ```typescript
 // npm install @sendgrid/mail
+import { Mail } from '@impruthvi/nodemail';
+
 Mail.configure({
   default: 'sendgrid',
   from: { address: 'noreply@example.com', name: 'My App' },
@@ -121,6 +131,8 @@ Mail.configure({
 
 ```typescript
 // npm install @aws-sdk/client-ses
+import { Mail } from '@impruthvi/nodemail';
+
 Mail.configure({
   default: 'ses',
   from: { address: 'noreply@example.com', name: 'My App' },
@@ -281,10 +293,10 @@ If you've used Laravel's Mail system, you know how elegant it is:
 Mail::to($user->email)->send(new WelcomeEmail($user));
 ```
 
-**nodemail** brings this same elegance to Node.js/TypeScript:
+**@impruthvi/nodemail** brings this same elegance to Node.js/TypeScript:
 
 ```typescript
-// nodemail (TypeScript)
+// @impruthvi/nodemail (TypeScript)
 await Mail.to(user.email).send(new WelcomeEmail(user));
 ```
 

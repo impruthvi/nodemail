@@ -1,12 +1,9 @@
 {
-  "name": "nodemail",
-  "version": "0.1.0",
+  "name": "@impruthvi/nodemail",
+  "version": "0.2.0",
   "description": "A unified mail service for Node.js/TypeScript with Laravel-like simplicity. Support for multiple providers (SMTP, SendGrid, AWS SES, Mailgun, Resend, etc.) - just change environment variables, no code changes needed.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "bin": {
-    "nodemail": "./dist/cli/index.js"
-  },
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch src/index.ts",
@@ -54,8 +51,10 @@
   },
   "files": [
     "dist",
+    "examples",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "dependencies": {
     "dotenv": "^16.4.5",

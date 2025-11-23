@@ -1,9 +1,15 @@
 # Files to exclude from npm package
 src/
 tests/
-examples/
-docs/
 coverage/
+
+# Development documentation
+docs/
+PROGRESS.md
+PROJECT_PLAN.md
+TODO.md
+NOTES.md
+GITHUB_SETUP.md
 
 # Configuration files
 .eslintrc.js
