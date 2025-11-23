@@ -1,0 +1,33 @@
+# Files to exclude from npm package
+src/
+tests/
+examples/
+docs/
+coverage/
+
+# Configuration files
+.eslintrc.js
+.prettierrc
+jest.config.js
+tsconfig.json
+
+# Git files
+.git/
+.gitignore
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Editor files
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Other
+*.tsbuildinfo
+.DS_Store
