@@ -17,18 +17,25 @@ A lightweight, developer-friendly email library where you can:
 
 Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 
-## ✨ Planned Features
+## ✨ Features
 
-- 🎯 **Multiple Providers** - SMTP, SendGrid, AWS SES, Mailgun, Resend, Postmark
+### ✅ Available Now
+- 🎯 **Multiple Providers** - SMTP (Nodemailer), SendGrid, AWS SES
 - 🪶 **Lightweight** - Only ~25MB with SMTP, install additional providers as needed
-- 📝 **Mailable Classes** - Reusable, testable email definitions
+- 🔒 **Type-Safe** - Full TypeScript support with strict typing
+- 🎨 **Fluent API** - Chainable, Laravel-inspired interface
+- ⚡ **Dynamic Loading** - Providers loaded only when installed (peerDependencies)
+- 🛡️ **Error Handling** - Graceful degradation with helpful error messages
+
+### 🚧 Coming Soon
+- 📝 **Mailable Classes** - Enhanced reusable email definitions
 - 🔔 **Notifications** - Multi-channel notification system
 - 📋 **Markdown Mail** - Beautiful emails from markdown
 - 🧪 **Testing Utilities** - Mail::fake() for testing
-- 📦 **Queue Support** - Background email sending
+- 📦 **Queue Support** - Background email sending (Bull/BullMQ)
 - 🎨 **Template Engines** - Handlebars, EJS, Pug
 - 🌍 **i18n Support** - Multi-language emails
-- 🔒 **Type-Safe** - Full TypeScript support
+- 🚀 **More Providers** - Mailgun, Resend, Postmark, Mailtrap
 
 ## 📦 Installation
 
@@ -38,15 +45,19 @@ npm install nodemail
 
 **Lightweight by default!** Only includes SMTP support (~25MB).
 
-### Adding More Providers (Optional)
+### Adding Providers (Optional)
 
+**Currently Supported:**
 ```bash
-# SendGrid
+# SendGrid (✅ Implemented)
 npm install @sendgrid/mail
 
-# AWS SES  
+# AWS SES (✅ Implemented)
 npm install @aws-sdk/client-ses
+```
 
+**Coming Soon:**
+```bash
 # Mailgun
 npm install mailgun.js
 
@@ -59,12 +70,11 @@ npm install postmark
 
 ## 🚀 Quick Start
 
-**Basic usage (works now):**
+### SMTP (Nodemailer)
 
 ```typescript
 import { Mail } from 'nodemail';
 
-// Configure once
 Mail.configure({
   default: 'smtp',
   from: {
@@ -89,6 +99,40 @@ await Mail.to('user@example.com')
   .subject('Welcome!')
   .html('<h1>Hello World!</h1>')
   .send();
+```
+
+### SendGrid
+
+```typescript
+// npm install @sendgrid/mail
+Mail.configure({
+  default: 'sendgrid',
+  from: { address: 'noreply@example.com', name: 'My App' },
+  mailers: {
+    sendgrid: {
+      driver: 'sendgrid',
+      apiKey: process.env.SENDGRID_API_KEY,
+    },
+  },
+});
+```
+
+### AWS SES
+
+```typescript
+// npm install @aws-sdk/client-ses
+Mail.configure({
+  default: 'ses',
+  from: { address: 'noreply@example.com', name: 'My App' },
+  mailers: {
+    ses: {
+      driver: 'ses',
+      region: 'us-east-1',
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+  },
+});
 ```
 
 **Advanced usage (coming soon):**
@@ -176,24 +220,25 @@ await Mail.to('user@example.com').send(new WelcomeEmail(user));
 - Core type definitions
 - Lightweight architecture (peerDependencies)
 
-**Phase 2: Core Implementation** ✅ Complete (SMTP)
+**Phase 2: Core Implementation** ✅ Complete
 - ✅ Mail Manager & Facade
 - ✅ SMTP Provider (nodemailer)
+- ✅ SendGrid Provider (@sendgrid/mail)
+- ✅ AWS SES Provider (@aws-sdk/client-ses)
 - ✅ Message builder with fluent API
 - ✅ Configuration system
-- ✅ Error handling
-- 🚧 SendGrid provider (next)
-- 🚧 AWS SES provider (next)
-- 🚧 Other providers (Mailgun, Resend, etc.)
+- ✅ Error handling & graceful degradation
+- 🚧 Other providers (Mailgun, Resend, Postmark) - coming soon
 
-**Phase 3+: Advanced Features** 📋 Planned
-- Mailable classes (enhancement)
-- Notification system
-- Queue integration  
-- Template engines
-- Testing utilities (Mail::fake())
+**Phase 3: Advanced Features** 🚧 Next
+- Enhanced Mailable classes with template support
+- Additional providers (Mailgun, Resend, Postmark)
+- Queue integration (Bull/BullMQ)
+- Template engines (Handlebars, EJS, Pug)
+- Testing utilities (Mail::fake(), assertSent())
+- Unit test coverage
 - CLI tools
-- Markdown mail
+- Markdown mail support
 
 ## 🤝 Contributing
 
