@@ -11,7 +11,7 @@ let SESClient: (new (config: unknown) => SESClient) | null = null;
 let SendEmailCommand: SendEmailCommand | null = null;
 
 try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment
   const sesModule = require('@aws-sdk/client-ses');
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   SESClient = sesModule.SESClient;
