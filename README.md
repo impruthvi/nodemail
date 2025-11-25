@@ -23,7 +23,7 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 ## ✨ Features
 
 ### ✅ Available Now
-- 🎯 **Multiple Providers** - SMTP (Nodemailer), SendGrid, AWS SES
+- 🎯 **Multiple Providers** - SMTP (Nodemailer), SendGrid, AWS SES, Mailgun, Resend, Postmark
 - 🪶 **Lightweight** - Only ~25MB with SMTP, install additional providers as needed
 - 🔒 **Type-Safe** - Full TypeScript support with strict typing
 - 🎨 **Fluent API** - Chainable, Laravel-inspired interface
@@ -38,7 +38,7 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 - 📦 **Queue Support** - Background email sending (Bull/BullMQ)
 - 🎨 **Template Engines** - Handlebars, EJS, Pug
 - 🌍 **i18n Support** - Multi-language emails
-- 🚀 **More Providers** - Mailgun, Resend, Postmark, Mailtrap
+- 🚀 **More Providers** - Mailtrap and others
 
 ## 📦 Installation
 
@@ -62,17 +62,14 @@ npm install @sendgrid/mail
 
 # AWS SES (✅ Implemented)
 npm install @aws-sdk/client-ses
-```
 
-**Coming Soon:**
-```bash
-# Mailgun
-npm install mailgun.js
+# Mailgun (✅ Implemented)
+npm install mailgun.js form-data
 
-# Resend
+# Resend (✅ Implemented)
 npm install resend
 
-# Postmark
+# Postmark (✅ Implemented)
 npm install postmark
 ```
 
@@ -142,6 +139,62 @@ Mail.configure({
       region: 'us-east-1',
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+  },
+});
+```
+
+### Mailgun
+
+```typescript
+// npm install mailgun.js form-data
+import { Mail } from '@impruthvi/nodemail';
+
+Mail.configure({
+  default: 'mailgun',
+  from: { address: 'noreply@yourdomain.com', name: 'My App' },
+  mailers: {
+    mailgun: {
+      driver: 'mailgun',
+      domain: process.env.MAILGUN_DOMAIN,
+      apiKey: process.env.MAILGUN_API_KEY,
+      region: 'us', // or 'eu'
+    },
+  },
+});
+```
+
+### Resend
+
+```typescript
+// npm install resend
+import { Mail } from '@impruthvi/nodemail';
+
+Mail.configure({
+  default: 'resend',
+  from: { address: 'noreply@yourdomain.com', name: 'My App' },
+  mailers: {
+    resend: {
+      driver: 'resend',
+      apiKey: process.env.RESEND_API_KEY,
+    },
+  },
+});
+```
+
+### Postmark
+
+```typescript
+// npm install postmark
+import { Mail } from '@impruthvi/nodemail';
+
+Mail.configure({
+  default: 'postmark',
+  from: { address: 'noreply@yourdomain.com', name: 'My App' },
+  mailers: {
+    postmark: {
+      driver: 'postmark',
+      serverToken: process.env.POSTMARK_SERVER_TOKEN,
     },
   },
 });

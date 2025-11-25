@@ -13,6 +13,9 @@ import type {
 import { SmtpProvider } from '../providers/SmtpProvider';
 import { SendGridProvider } from '../providers/SendGridProvider';
 import { SesProvider } from '../providers/SesProvider';
+import { MailgunProvider } from '../providers/MailgunProvider';
+import { ResendProvider } from '../providers/ResendProvider';
+import { PostmarkProvider } from '../providers/PostmarkProvider';
 
 export class MailManager {
   private config: MailConfig;
@@ -33,6 +36,12 @@ export class MailManager {
         return new SendGridProvider(mailerConfig as import('../types').SendGridConfig);
       case 'ses':
         return new SesProvider(mailerConfig as import('../types').SesConfig);
+      case 'mailgun':
+        return new MailgunProvider(mailerConfig as import('../types').MailgunConfig);
+      case 'resend':
+        return new ResendProvider(mailerConfig as import('../types').ResendConfig);
+      case 'postmark':
+        return new PostmarkProvider(mailerConfig as import('../types').PostmarkConfig);
       default:
         throw new Error(`Unsupported mail driver: ${mailerConfig.driver}`);
     }

@@ -12,9 +12,12 @@ export { Message } from './core/Message';
 export { SmtpProvider } from './providers/SmtpProvider';
 export { SendGridProvider } from './providers/SendGridProvider';
 export { SesProvider } from './providers/SesProvider';
+export { MailgunProvider } from './providers/MailgunProvider';
+export { ResendProvider } from './providers/ResendProvider';
+export { PostmarkProvider } from './providers/PostmarkProvider';
 
 // Types
 export * from './types';
 
 // Version
-export const VERSION = '0.1.0';
+export const VERSION = '0.3.0';

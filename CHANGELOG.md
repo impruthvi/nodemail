@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-11-25
+
+### Added
+- **New email providers** (3 additional providers)
+  - MailgunProvider with dynamic loading
+  - ResendProvider with dynamic loading
+  - PostmarkProvider with dynamic loading
+- Example files for new providers
+  - examples/mailgun.ts
+  - examples/resend.ts
+  - examples/postmark.ts
+- Support for all provider-specific features
+  - Mailgun: EU region support, custom headers
+  - Resend: Tags and custom headers
+  - Postmark: Message streams and tags
+- Updated MailManager to support 6 total providers
+
+### Changed
+- Updated README with documentation for Mailgun, Resend, and Postmark
+- Updated package.json to version 0.3.0
+- Added form-data as peer dependency for Mailgun
+- Updated provider installation instructions
+
+### Fixed
+- TypeScript strict mode compliance for new providers
+- ESLint warnings with proper annotations
+
 ## [0.2.0] - 2025-11-23
 
 ### Added
