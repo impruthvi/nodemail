@@ -1,7 +1,7 @@
 {
   "name": "@impruthvi/nodemail",
-  "version": "0.3.0",
-  "description": "A unified mail service for Node.js/TypeScript with Laravel-like simplicity. Support for multiple providers (SMTP, SendGrid, AWS SES, Mailgun, Resend, Postmark) - just change environment variables, no code changes needed.",
+  "version": "0.4.0",
+  "description": "A unified mail service for Node.js/TypeScript with Laravel-like simplicity. Support for multiple providers (SMTP, SendGrid, AWS SES, Mailgun, Resend, Postmark) and template engines (Handlebars, EJS, Pug) - just change environment variables, no code changes needed.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -11,8 +11,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix",
+    "lint": "eslint \"src/**/*.ts\" \"examples/**/*.ts\" \"tests/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" \"examples/**/*.ts\" \"tests/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
     "prepublishOnly": "npm run build",
@@ -64,9 +64,12 @@
   "peerDependencies": {
     "@aws-sdk/client-ses": "^3.699.0",
     "@sendgrid/mail": "^8.1.4",
+    "ejs": "^3.1.10",
     "form-data": "^4.0.1",
+    "handlebars": "^4.7.8",
     "mailgun.js": "^10.2.3",
     "postmark": "^4.0.5",
+    "pug": "^3.0.3",
     "resend": "^4.0.1"
   },
   "peerDependenciesMeta": {
@@ -86,6 +89,15 @@
       "optional": true
     },
     "postmark": {
+      "optional": true
+    },
+    "handlebars": {
+      "optional": true
+    },
+    "ejs": {
+      "optional": true
+    },
+    "pug": {
       "optional": true
     }
   },

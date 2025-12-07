@@ -1,0 +1,14 @@
+doctype html
+html
+  head
+    title= title
+  body
+    h1= message
+    p Dear #{username},
+    p This is a notification about your account activity.
+    if urgent
+      p.alert ⚠️ This requires immediate attention!
+    ul
+      each item in items
+        li= item
+    p Sent at: #{timestamp}

@@ -3,8 +3,8 @@
 [![npm version](https://badge.fury.io/js/@impruthvi%2Fnodemail.svg)](https://www.npmjs.com/package/@impruthvi/nodemail)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/tests-25%20passing-brightgreen)](https://github.com/impruthvi/nodemail)
-[![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)](https://github.com/impruthvi/nodemail)
+[![Tests](https://img.shields.io/badge/tests-112%20passing-brightgreen)](https://github.com/impruthvi/nodemail)
+[![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](https://github.com/impruthvi/nodemail)
 
 > 🚧 **Work in Progress** - A unified mail service for Node.js/TypeScript inspired by Laravel's elegant Mail system.
 
@@ -22,21 +22,21 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 
 ## ✨ Features
 
-### ✅ Available Now
+### ✅ Available Now (v0.4.0)
 - 🎯 **Multiple Providers** - SMTP (Nodemailer), SendGrid, AWS SES, Mailgun, Resend, Postmark
+- 🎨 **Template Engines** - Handlebars, EJS, Pug support with dynamic loading
+- 📝 **Mailable Classes** - Reusable email definitions with template support
 - 🪶 **Lightweight** - Only ~25MB with SMTP, install additional providers as needed
 - 🔒 **Type-Safe** - Full TypeScript support with strict typing
-- 🎨 **Fluent API** - Chainable, Laravel-inspired interface
-- ⚡ **Dynamic Loading** - Providers loaded only when installed (peerDependencies)
+- ✨ **Complete Fluent API** - Chain to(), subject(), html(), template(), data(), cc(), bcc(), attachments(), headers()
+- ⚡ **Dynamic Loading** - Providers and templates loaded only when installed (peerDependencies)
 - 🛡️ **Error Handling** - Graceful degradation with helpful error messages
 
 ### 🚧 Coming Soon
-- 📝 **Mailable Classes** - Enhanced reusable email definitions
 - 🔔 **Notifications** - Multi-channel notification system
 - 📋 **Markdown Mail** - Beautiful emails from markdown
 - 🧪 **Testing Utilities** - Mail::fake() for testing
 - 📦 **Queue Support** - Background email sending (Bull/BullMQ)
-- 🎨 **Template Engines** - Handlebars, EJS, Pug
 - 🌍 **i18n Support** - Multi-language emails
 - 🚀 **More Providers** - Mailtrap and others
 
@@ -71,6 +71,20 @@ npm install resend
 
 # Postmark (✅ Implemented)
 npm install postmark
+```
+
+### Adding Template Engines (Optional)
+
+**Currently Supported:**
+```bash
+# Handlebars (✅ Implemented)
+npm install handlebars
+
+# EJS (✅ Implemented)
+npm install ejs
+
+# Pug (✅ Implemented)
+npm install pug
 ```
 
 ## 🚀 Quick Start
@@ -198,6 +212,130 @@ Mail.configure({
     },
   },
 });
+```
+
+## 🎨 Template Engines
+
+### Using Handlebars
+
+```typescript
+// npm install handlebars
+import { Mail } from '@impruthvi/nodemail';
+
+Mail.configure({
+  default: 'smtp',
+  from: { address: 'noreply@example.com', name: 'My App' },
+  mailers: { /* your mailer config */ },
+  templates: {
+    engine: 'handlebars',
+    viewsPath: './views/emails',
+    extension: '.hbs',
+    cache: true,
+  },
+});
+
+// Send with template
+await Mail.to('user@example.com')
+  .subject('Welcome!')
+  .template('welcome')
+  .data({ name: 'John', appName: 'My App' })
+  .send();
+```
+
+**Template file** (`views/emails/welcome.hbs`):
+```handlebars
+<h1>Welcome, {{name}}!</h1>
+<p>Thank you for joining {{appName}}.</p>
+```
+
+### Using EJS
+
+```typescript
+// npm install ejs
+Mail.configure({
+  templates: {
+    engine: 'ejs',
+    viewsPath: './views/emails',
+    extension: '.ejs',
+  },
+});
+
+await Mail.to('customer@example.com')
+  .subject('Your Invoice')
+  .template('invoice')
+  .data({ items: [...], total: 99.99 })
+  .send();
+```
+
+### Using Pug
+
+```typescript
+// npm install pug
+Mail.configure({
+  templates: {
+    engine: 'pug',
+    viewsPath: './views/emails',
+    cache: true,
+  },
+});
+
+await Mail.to('user@example.com')
+  .subject('Notification')
+  .template('notification')
+  .data({ title: 'Update', message: 'New features!' })
+  .send();
+```
+
+## 📨 Complete Fluent API
+
+```typescript
+await Mail.to('user@example.com')
+  .subject('Complete Example')
+  .html('<h1>Hello!</h1>')
+  .text('Hello!')
+  .from('custom@example.com')
+  .cc(['manager@example.com', 'team@example.com'])
+  .bcc('archive@example.com')
+  .replyTo('support@example.com')
+  .attachments([
+    { filename: 'report.pdf', path: './files/report.pdf' },
+    { filename: 'image.png', content: buffer },
+  ])
+  .headers({ 'X-Custom-Header': 'value' })
+  .send();
+```
+
+## 📝 Mailable Classes
+
+Create reusable email classes with Laravel-like syntax:
+
+```typescript
+import { Mailable } from '@impruthvi/nodemail';
+
+class WelcomeEmail extends Mailable {
+  constructor(
+    private user: { name: string; email: string },
+    private appName: string
+  ) {
+    super();
+  }
+
+  build() {
+    return this
+      .subject(`Welcome to ${this.appName}!`)
+      .view('welcome', {
+        name: this.user.name,
+        email: this.user.email,
+        appName: this.appName,
+      });
+  }
+}
+
+// Method 1: Laravel-style (recommended)
+await Mail.to('user@example.com').send(new WelcomeEmail(user, 'My App'));
+
+// Method 2: Direct sending
+await new WelcomeEmail(user, 'My App').to('user@example.com').send();
 ```
 
 **Advanced usage (coming soon):**

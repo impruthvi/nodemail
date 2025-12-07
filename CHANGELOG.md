@@ -7,6 +7,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2025-12-07
+
+### Added
+- **Template Engine Support** (Phase 4 complete)
+  - HandlebarsEngine with dynamic loading and caching
+  - EjsEngine with dynamic loading and caching
+  - PugEngine with dynamic loading and caching
+  - TemplateEngine interface for custom engines
+- **Complete Fluent API** - All email options now chainable
+  - Added `cc()` method for carbon copy recipients
+  - Added `bcc()` method for blind carbon copy recipients
+  - Added `replyTo()` method for reply-to addresses
+  - Added `attachments()` method for file attachments
+  - Added `headers()` method for custom headers
+- **Laravel-like Mailable Pattern** - Elegant email class API
+  - `Mailable.to()` method for setting recipients
+  - `Mailable.send()` method for direct sending
+  - `Mail.to().send(mailable)` Laravel-style syntax (recommended)
+  - `mailable.to().send()` alternative direct syntax
+  - Protected methods: `cc()`, `bcc()`, `replyTo()`, `attach()`, `withHeaders()`
+- Enhanced MailManager with automatic template rendering
+- Added template configuration to MailConfig
+  - Support for 'handlebars', 'ejs', 'pug' engines
+  - Custom engine instance support
+  - Configurable views path, extension, and caching
+- Template engine tests (34 new tests)
+  - HandlebarsEngine.test.ts (11 tests)
+  - EjsEngine.test.ts (11 tests)
+  - PugEngine.test.ts (12 tests)
+- Mailable tests (10 new tests)
+  - Comprehensive Mailable class testing
+  - Template support validation
+  - Laravel-style API testing
+- Template examples
+  - examples/with-handlebars.ts
+  - examples/with-ejs.ts
+  - examples/with-pug.ts
+  - examples/with-mailable-templates.ts (refactored)
+  - examples/views/ directory with sample templates
+- Test utilities
+  - test-smtp-ethereal.ts for instant SMTP testing
+  - test-templates.ts for template engine validation
+
+### Changed
+- **BREAKING**: Refactored Mailable class to Laravel-like pattern
+  - Removed `getMailOptions()` method
+  - Now uses `build()` method with fluent API
+  - Direct sending capability added
+- Updated package.json to version 0.4.0
+- Added handlebars, ejs, pug to peerDependencies (all optional)
+- Enhanced MessageBuilder.send() to accept Mailable instances
+- Updated test suite: 122 total tests (17 new tests added)
+- Code coverage: 85%+ overall
+- Template engines coverage: 93.5%
+- ESLint configuration for all directories (src, examples, tests)
+
+### Fixed
+- Type safety for template engine configuration
+- Promise handling in template rendering
+- ESLint warnings for template engine dynamic loading
+- ESLint parsing errors for examples directory
+- Floating promise warnings in example files
+
 ## [0.3.0] - 2025-11-25
 
 ### Added

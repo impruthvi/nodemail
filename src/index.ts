@@ -16,8 +16,12 @@ export { MailgunProvider } from './providers/MailgunProvider';
 export { ResendProvider } from './providers/ResendProvider';
 export { PostmarkProvider } from './providers/PostmarkProvider';
 
+// Template Engines
+export type { TemplateEngine, TemplateEngineOptions } from './templates';
+export { HandlebarsEngine, EjsEngine, PugEngine } from './templates';
+
 // Types
 export * from './types';
 
 // Version
-export const VERSION = '0.3.0';
+export const VERSION = '0.4.0';

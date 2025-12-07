@@ -2,6 +2,8 @@
  * Type definitions for nodemail
  */
 
+import type { TemplateEngine } from '../templates/TemplateEngine';
+
 export interface MailConfig {
   default: string;
   from: {
@@ -9,6 +11,15 @@ export interface MailConfig {
     name: string;
   };
   mailers: Record<string, MailerConfig>;
+  templates?: TemplateConfig;
+}
+
+export interface TemplateConfig {
+  engine?: 'handlebars' | 'ejs' | 'pug' | TemplateEngine;
+  viewsPath?: string;
+  extension?: string;
+  cache?: boolean;
+  options?: Record<string, unknown>;
 }
 
 export interface MailerConfig {

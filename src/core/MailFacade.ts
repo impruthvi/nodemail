@@ -41,6 +41,14 @@ class MailFacade {
   }
 
   /**
+   * Send a mailable directly
+   */
+  static async send(mailable: import('./Mailable').Mailable): Promise<import('../types').MailResponse> {
+    mailable.setMailManager(this.getInstance());
+    return mailable.send();
+  }
+
+  /**
    * Enable fake mode for testing
    */
   static fake(): void {

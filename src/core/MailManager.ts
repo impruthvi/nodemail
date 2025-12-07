@@ -9,6 +9,7 @@ import type {
   MailProvider,
   MailResponse,
   MailerConfig,
+  Attachment,
 } from '../types';
 import { SmtpProvider } from '../providers/SmtpProvider';
 import { SendGridProvider } from '../providers/SendGridProvider';
@@ -16,14 +17,63 @@ import { SesProvider } from '../providers/SesProvider';
 import { MailgunProvider } from '../providers/MailgunProvider';
 import { ResendProvider } from '../providers/ResendProvider';
 import { PostmarkProvider } from '../providers/PostmarkProvider';
+import type { TemplateEngine, TemplateEngineOptions } from '../templates/TemplateEngine';
+import { HandlebarsEngine } from '../templates/HandlebarsEngine';
+import { EjsEngine } from '../templates/EjsEngine';
+import { PugEngine } from '../templates/PugEngine';
 
 export class MailManager {
   private config: MailConfig;
   private providers: Map<string, MailProvider> = new Map();
+  private templateEngine?: TemplateEngine;
 
   constructor(config: MailConfig) {
     this.config = config;
+    this.initializeTemplateEngine();
   }
+
+  /**
+   * Initialize template engine if configured
+   */
+  /* eslint-disable @typescript-eslint/restrict-template-expressions */
+  private initializeTemplateEngine(): void {
+    if (!this.config.templates) {
+      return;
+    }
+
+    const { engine, viewsPath, extension, cache, options } = this.config.templates;
+
+    if (!engine) {
+      return;
+    }
+
+    const engineOptions: TemplateEngineOptions = {
+      ...(viewsPath && { viewsPath }),
+      ...(extension && { extension }),
+      ...(cache !== undefined && { cache }),
+      ...(options && { options }),
+    };
+
+    if (typeof engine === 'string') {
+      switch (engine) {
+        case 'handlebars':
+          this.templateEngine = new HandlebarsEngine(engineOptions);
+          break;
+        case 'ejs':
+          this.templateEngine = new EjsEngine(engineOptions);
+          break;
+        case 'pug':
+          this.templateEngine = new PugEngine(engineOptions);
+          break;
+        default:
+          throw new Error(`Unsupported template engine: ${engine}`);
+      }
+    } else {
+      // Custom template engine instance provided
+      this.templateEngine = engine;
+    }
+  }
+  /* eslint-enable @typescript-eslint/restrict-template-expressions */
 
   /**
    * Create a provider instance based on configuration
@@ -96,6 +146,15 @@ export class MailManager {
    * Send an email using the default mailer
    */
   async send(options: MailOptions): Promise<MailResponse> {
+    // Render template if specified
+    if (options.template && this.templateEngine) {
+      const html = await this.templateEngine.renderFile(
+        options.template,
+        options.data
+      );
+      options = { ...options, html };
+    }
+
     const provider = this.getProvider();
     return provider.send(options);
   }
@@ -141,7 +200,55 @@ export class MessageBuilder {
     return this;
   }
 
-  async send(): Promise<MailResponse> {
+  cc(cc: string | string[]) {
+    this.options.cc = cc;
+    return this;
+  }
+
+  bcc(bcc: string | string[]) {
+    this.options.bcc = bcc;
+    return this;
+  }
+
+  replyTo(replyTo: string) {
+    this.options.replyTo = replyTo;
+    return this;
+  }
+
+  attachments(attachments: Attachment[]) {
+    this.options.attachments = attachments;
+    return this;
+  }
+
+  headers(headers: Record<string, string>) {
+    this.options.headers = headers;
+    return this;
+  }
+
+  template(template: string) {
+    this.options.template = template;
+    return this;
+  }
+
+  data(data: Record<string, unknown>) {
+    this.options.data = data;
+    return this;
+  }
+
+  async send(mailable?: import('./Mailable').Mailable): Promise<MailResponse> {
+    // If a Mailable instance is provided, use it
+    if (mailable) {
+      mailable.setMailManager(this.manager);
+      const mailOptions = mailable.getMailOptions();
+      
+      // Merge the recipient from builder with mailable options
+      return this.manager.send({
+        ...mailOptions,
+        to: this.options.to!,
+      } as MailOptions);
+    }
+
+    // Otherwise, use the built options
     if (!this.options.subject) {
       throw new Error('Email subject is required');
     }

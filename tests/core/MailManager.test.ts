@@ -226,5 +226,101 @@ describe('MailManager', () => {
         html: '<p>Test</p>',
       });
     });
+
+    it('should set template with fluent API', () => {
+      const builder = mailManager
+        .to('user@test.com')
+        .subject('Test')
+        .template('welcome');
+
+      expect(builder.options).toEqual({
+        to: 'user@test.com',
+        subject: 'Test',
+        template: 'welcome',
+      });
+    });
+
+    it('should set data with fluent API', () => {
+      const builder = mailManager
+        .to('user@test.com')
+        .subject('Test')
+        .template('welcome')
+        .data({ name: 'John', email: 'john@example.com' });
+
+      expect(builder.options).toEqual({
+        to: 'user@test.com',
+        subject: 'Test',
+        template: 'welcome',
+        data: { name: 'John', email: 'john@example.com' },
+      });
+    });
+
+    it('should set cc with fluent API', () => {
+      const builder = mailManager
+        .to('user@test.com')
+        .subject('Test')
+        .cc('cc@example.com');
+
+      expect(builder.options).toEqual({
+        to: 'user@test.com',
+        subject: 'Test',
+        cc: 'cc@example.com',
+      });
+    });
+
+    it('should set bcc with fluent API', () => {
+      const builder = mailManager
+        .to('user@test.com')
+        .subject('Test')
+        .bcc(['bcc1@example.com', 'bcc2@example.com']);
+
+      expect(builder.options).toEqual({
+        to: 'user@test.com',
+        subject: 'Test',
+        bcc: ['bcc1@example.com', 'bcc2@example.com'],
+      });
+    });
+
+    it('should set replyTo with fluent API', () => {
+      const builder = mailManager
+        .to('user@test.com')
+        .subject('Test')
+        .replyTo('reply@example.com');
+
+      expect(builder.options).toEqual({
+        to: 'user@test.com',
+        subject: 'Test',
+        replyTo: 'reply@example.com',
+      });
+    });
+
+    it('should set attachments with fluent API', () => {
+      const attachments = [
+        { filename: 'test.pdf', content: Buffer.from('test'), contentType: 'application/pdf' },
+      ];
+      const builder = mailManager
+        .to('user@test.com')
+        .subject('Test')
+        .attachments(attachments);
+
+      expect(builder.options).toEqual({
+        to: 'user@test.com',
+        subject: 'Test',
+        attachments,
+      });
+    });
+
+    it('should set headers with fluent API', () => {
+      const builder = mailManager
+        .to('user@test.com')
+        .subject('Test')
+        .headers({ 'X-Custom-Header': 'value' });
+
+      expect(builder.options).toEqual({
+        to: 'user@test.com',
+        subject: 'Test',
+        headers: { 'X-Custom-Header': 'value' },
+      });
+    });
   });
 });
