@@ -3,12 +3,10 @@
 [![npm version](https://badge.fury.io/js/@impruthvi%2Fnodemail.svg)](https://www.npmjs.com/package/@impruthvi/nodemail)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/tests-112%20passing-brightgreen)](https://github.com/impruthvi/nodemail)
+[![Tests](https://img.shields.io/badge/tests-122%20passing-brightgreen)](https://github.com/impruthvi/nodemail)
 [![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](https://github.com/impruthvi/nodemail)
 
-> 🚧 **Work in Progress** - A unified mail service for Node.js/TypeScript inspired by Laravel's elegant Mail system.
-
-**@impruthvi/nodemail** aims to bring the simplicity and elegance of Laravel's Mail system to the Node.js ecosystem with full TypeScript support.
+**@impruthvi/nodemail** brings the simplicity and elegance of Laravel's Mail system to the Node.js ecosystem with full TypeScript support.
 
 ## 🎯 Vision
 
@@ -43,12 +41,12 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 ## 📦 Installation
 
 ```bash
-npm install @impruthvi/nodemail@beta
+npm install @impruthvi/nodemail
 ```
 
-Or for the latest stable (when v1.0.0 is released):
+Or install a specific version:
 ```bash
-npm install @impruthvi/nodemail
+npm install @impruthvi/nodemail@0.4.0
 ```
 
 **Lightweight by default!** Only includes SMTP support (~25MB).
@@ -428,20 +426,32 @@ await Mail.to('user@example.com').send(new WelcomeEmail(user));
 - ✅ SMTP Provider (nodemailer)
 - ✅ SendGrid Provider (@sendgrid/mail)
 - ✅ AWS SES Provider (@aws-sdk/client-ses)
-- ✅ Message builder with fluent API
+- ✅ Message builder with complete fluent API
 - ✅ Configuration system
 - ✅ Error handling & graceful degradation
-- 🚧 Other providers (Mailgun, Resend, Postmark) - coming soon
 
-**Phase 3: Advanced Features** 🚧 Next
-- Enhanced Mailable classes with template support
-- Additional providers (Mailgun, Resend, Postmark)
+**Phase 3: Additional Providers** ✅ Complete
+- ✅ Mailgun Provider (mailgun.js)
+- ✅ Resend Provider (resend)
+- ✅ Postmark Provider (postmark)
+- ✅ Dynamic loading for all providers
+- ✅ Comprehensive provider tests
+
+**Phase 4: Template Engines & Mailable** ✅ Complete
+- ✅ Template engines (Handlebars, EJS, Pug)
+- ✅ Laravel-like Mailable classes with template support
+- ✅ Complete fluent API (cc, bcc, replyTo, attachments, headers)
+- ✅ Dynamic template loading with caching
+- ✅ Comprehensive test suite (122 tests)
+- ✅ 85%+ code coverage
+
+**Phase 5: Advanced Features** 🚧 Coming Soon
 - Queue integration (Bull/BullMQ)
-- Template engines (Handlebars, EJS, Pug)
 - Testing utilities (Mail::fake(), assertSent())
-- Unit test coverage
 - CLI tools
 - Markdown mail support
+- Multi-channel notifications
+- i18n support
 
 ## 🤝 Contributing
 
@@ -504,7 +514,7 @@ Unlike other packages that bundle everything:
 - **Type-Safe**: Full TypeScript support with strict typing
 - **Developer-Friendly**: Clean, intuitive API
 - **Production-Ready**: Built with best practices
-- **Well-Tested**: Comprehensive test coverage (coming soon)
+- **Well-Tested**: 122 passing tests with 85%+ coverage
 
 ## 📄 License
 
