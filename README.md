@@ -3,7 +3,7 @@
 [![npm version](https://badge.fury.io/js/@impruthvi%2Fnodemail.svg)](https://www.npmjs.com/package/@impruthvi/nodemail)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/tests-122%20passing-brightgreen)](https://github.com/impruthvi/nodemail)
+[![Tests](https://img.shields.io/badge/tests-172%20passing-brightgreen)](https://github.com/impruthvi/nodemail)
 [![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](https://github.com/impruthvi/nodemail)
 
 **@impruthvi/nodemail** brings the simplicity and elegance of Laravel's Mail system to the Node.js ecosystem with full TypeScript support.
@@ -20,10 +20,11 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 
 ## ✨ Features
 
-### ✅ Available Now (v0.4.0)
+### ✅ Available Now (v0.5.0)
 - 🎯 **Multiple Providers** - SMTP (Nodemailer), SendGrid, AWS SES, Mailgun, Resend, Postmark
 - 🎨 **Template Engines** - Handlebars, EJS, Pug support with dynamic loading
 - 📝 **Mailable Classes** - Reusable email definitions with template support
+- 🧪 **Testing Utilities** - Mail::fake() for testing (Laravel-style assertions)
 - 🪶 **Lightweight** - Only ~25MB with SMTP, install additional providers as needed
 - 🔒 **Type-Safe** - Full TypeScript support with strict typing
 - ✨ **Complete Fluent API** - Chain to(), subject(), html(), template(), data(), cc(), bcc(), attachments(), headers()
@@ -33,7 +34,6 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 ### 🚧 Coming Soon
 - 🔔 **Notifications** - Multi-channel notification system
 - 📋 **Markdown Mail** - Beautiful emails from markdown
-- 🧪 **Testing Utilities** - Mail::fake() for testing
 - 📦 **Queue Support** - Background email sending (Bull/BullMQ)
 - 🌍 **i18n Support** - Multi-language emails
 - 🚀 **More Providers** - Mailtrap and others
@@ -46,7 +46,7 @@ npm install @impruthvi/nodemail
 
 Or install a specific version:
 ```bash
-npm install @impruthvi/nodemail@0.4.0
+npm install @impruthvi/nodemail@0.5.0
 ```
 
 **Lightweight by default!** Only includes SMTP support (~25MB).
@@ -336,79 +336,109 @@ await Mail.to('user@example.com').send(new WelcomeEmail(user, 'My App'));
 await new WelcomeEmail(user, 'My App').to('user@example.com').send();
 ```
 
-**Advanced usage (coming soon):**
+## 🧪 Testing with Mail::fake()
+
+Test your emails without actually sending them - just like Laravel's `Mail::fake()`:
 
 ```typescript
-import { Mail } from 'nodemail';
+import { Mail, Mailable } from '@impruthvi/nodemail';
 
-// Configure once
-Mail.configure({
-  default: 'smtp',
-  from: {
-    address: 'noreply@example.com',
-    name: 'My App',
-  },
-  mailers: {
-    smtp: {
-      driver: 'smtp',
-      host: process.env.MAIL_HOST,
-      port: 587,
-      username: process.env.MAIL_USERNAME,
-      password: process.env.MAIL_PASSWORD,
-    },
-  },
-});
-
-// Send emails
-await Mail.to('user@example.com')
-  .subject('Welcome!')
-  .html('<h1>Hello World!</h1>')
-  .send();
-```
-
-**Advanced usage (coming soon):**
-
-```typescript
-import { Mail } from 'nodemail';
-
-// Configure once
-Mail.configure({
-  default: 'smtp',
-  from: {
-    address: 'noreply@example.com',
-    name: 'My App',
-  },
-  mailers: {
-    smtp: {
-      driver: 'smtp',
-      host: process.env.MAIL_HOST,
-      port: 587,
-      username: process.env.MAIL_USERNAME,
-      password: process.env.MAIL_PASSWORD,
-    },
-  },
-});
-
-// Send anywhere in your app
-await Mail.to('user@example.com')
-  .subject('Welcome!')
-  .html('<h1>Hello World!</h1>')
-  .send();
-
-// Or use Mailable classes
+// Your Mailable class
 class WelcomeEmail extends Mailable {
-  constructor(private user: User) {
+  constructor(public userName: string) {
     super();
   }
 
   build() {
     return this
-      .subject(`Welcome, ${this.user.name}!`)
-      .view('emails.welcome', { user: this.user });
+      .subject(`Welcome, ${this.userName}!`)
+      .html(`<h1>Hello ${this.userName}!</h1>`);
   }
 }
 
-await Mail.to('user@example.com').send(new WelcomeEmail(user));
+// In your tests
+describe('User Registration', () => {
+  beforeEach(() => {
+    Mail.fake(); // Enable fake mode
+  });
+
+  afterEach(() => {
+    Mail.restore(); // Restore real mailer
+  });
+
+  it('sends welcome email on registration', async () => {
+    // Your application code that sends email
+    await Mail.to('user@example.com').send(new WelcomeEmail('John'));
+
+    // Assert email was sent
+    Mail.assertSent(WelcomeEmail);
+
+    // Assert with conditions
+    Mail.assertSent(WelcomeEmail, (mail) => {
+      return mail.hasTo('user@example.com') &&
+             mail.subjectContains('Welcome');
+    });
+
+    // Assert sent count
+    Mail.assertSentCount(WelcomeEmail, 1);
+
+    // Assert other mailables were NOT sent
+    Mail.assertNotSent(PasswordResetEmail);
+  });
+
+  it('does not send email when validation fails', async () => {
+    // Code that doesn't send email
+    Mail.assertNothingSent();
+  });
+});
+```
+
+### Available Assertions
+
+| Method | Description |
+|--------|-------------|
+| `Mail.fake()` | Enable fake mode (store emails instead of sending) |
+| `Mail.restore()` | Restore real mailer |
+| `Mail.assertSent(Mailable)` | Assert mailable was sent |
+| `Mail.assertSent(Mailable, callback)` | Assert with custom conditions |
+| `Mail.assertSentCount(Mailable, count)` | Assert sent exactly N times |
+| `Mail.assertNotSent(Mailable)` | Assert mailable was NOT sent |
+| `Mail.assertNothingSent()` | Assert no emails were sent |
+| `Mail.assertQueued(Mailable)` | Assert mailable was queued |
+| `Mail.assertNothingQueued()` | Assert nothing was queued |
+| `Mail.sent()` | Get all sent messages |
+| `Mail.sent(Mailable)` | Get sent messages of specific type |
+
+### AssertableMessage Methods
+
+When inspecting sent messages, you can use these helper methods:
+
+```typescript
+const sent = Mail.sent(WelcomeEmail)[0];
+
+// Check recipients
+sent.hasTo('user@example.com');      // Check TO
+sent.hasCc('cc@example.com');        // Check CC
+sent.hasBcc('bcc@example.com');      // Check BCC
+
+// Check content
+sent.hasSubject('Welcome!');         // Exact subject match
+sent.subjectContains('Welcome');     // Subject contains
+sent.htmlContains('Hello');          // HTML contains
+sent.textContains('Hello');          // Plain text contains
+
+// Check attachments
+sent.hasAttachments();               // Has any attachments
+sent.hasAttachment('file.pdf');      // Has specific attachment
+
+// Check headers
+sent.hasHeader('X-Custom');          // Has header
+sent.hasHeader('X-Custom', 'value'); // Header with value
+
+// Get values
+sent.getTo();                        // Get recipients array
+sent.getSubject();                   // Get subject
+sent.getHtml();                      // Get HTML content
 ```
 
 ## 🛠️ Current Status
@@ -442,12 +472,17 @@ await Mail.to('user@example.com').send(new WelcomeEmail(user));
 - ✅ Laravel-like Mailable classes with template support
 - ✅ Complete fluent API (cc, bcc, replyTo, attachments, headers)
 - ✅ Dynamic template loading with caching
-- ✅ Comprehensive test suite (122 tests)
+
+**Phase 5: Testing Utilities** ✅ Complete (v0.5.0)
+- ✅ Mail::fake() for testing
+- ✅ assertSent(), assertNotSent(), assertNothingSent()
+- ✅ assertQueued(), assertNothingQueued()
+- ✅ AssertableMessage with inspection methods
+- ✅ Comprehensive test suite (172 tests)
 - ✅ 85%+ code coverage
 
-**Phase 5: Advanced Features** 🚧 Coming Soon
+**Phase 6: Advanced Features** 🚧 Coming Soon
 - Queue integration (Bull/BullMQ)
-- Testing utilities (Mail::fake(), assertSent())
 - CLI tools
 - Markdown mail support
 - Multi-channel notifications
@@ -514,7 +549,7 @@ Unlike other packages that bundle everything:
 - **Type-Safe**: Full TypeScript support with strict typing
 - **Developer-Friendly**: Clean, intuitive API
 - **Production-Ready**: Built with best practices
-- **Well-Tested**: 122 passing tests with 85%+ coverage
+- **Well-Tested**: 172 passing tests with 85%+ coverage
 
 ## 📄 License
 

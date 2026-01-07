@@ -20,8 +20,12 @@ export { PostmarkProvider } from './providers/PostmarkProvider';
 export type { TemplateEngine, TemplateEngineOptions } from './templates';
 export { HandlebarsEngine, EjsEngine, PugEngine } from './templates';
 
+// Testing Utilities
+export { MailFake, AssertableMessage } from './testing';
+export type { SentMessage } from './testing';
+
 // Types
 export * from './types';
 
 // Version
-export const VERSION = '0.4.0';
+export const VERSION = '0.5.0';
