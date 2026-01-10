@@ -52,6 +52,14 @@ export abstract class Mailable {
   }
 
   /**
+   * Set the from address
+   */
+  protected from(from: string): this {
+    this.options.from = from;
+    return this;
+  }
+
+  /**
    * Set the email subject
    */
   protected subject(subject: string): this {

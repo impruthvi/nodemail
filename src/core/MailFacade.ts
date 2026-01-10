@@ -5,7 +5,7 @@
  */
 
 import { MailManager } from './MailManager';
-import type { MailConfig, MailOptions, MailResponse } from '../types';
+import type { MailConfig, MailOptions, MailResponse, QueueJobResult } from '../types';
 import type { Mailable } from './Mailable';
 import { MailFake } from '../testing/MailFake';
 import type { AssertableMessage } from '../testing/AssertableMessage';
@@ -69,6 +69,58 @@ class MailFacade {
     return mailable.send();
   }
 
+  // ==================== Queue Methods ====================
+
+  /**
+   * Queue a mailable for background sending
+   */
+  static async queue(mailable: Mailable): Promise<QueueJobResult> {
+    if (this.isFaking()) {
+      const options = mailable.getMailOptions();
+      await this.fakeInstance!.queue(options as MailOptions, mailable);
+      return { success: true, jobId: `fake-${Date.now()}`, queue: 'mail' };
+    }
+    mailable.setMailManager(this.getInstance());
+    return this.getInstance().queue(mailable.getMailOptions() as MailOptions);
+  }
+
+  /**
+   * Queue a mailable with a delay (in seconds)
+   */
+  static async later(mailable: Mailable, delaySeconds: number): Promise<QueueJobResult> {
+    if (this.isFaking()) {
+      const options = mailable.getMailOptions();
+      await this.fakeInstance!.later(options as MailOptions, delaySeconds, mailable);
+      return { success: true, jobId: `fake-${Date.now()}`, queue: 'mail' };
+    }
+    mailable.setMailManager(this.getInstance());
+    return this.getInstance().later(mailable.getMailOptions() as MailOptions, delaySeconds);
+  }
+
+  /**
+   * Schedule a mailable for a specific time
+   */
+  static async at(mailable: Mailable, date: Date): Promise<QueueJobResult> {
+    if (this.isFaking()) {
+      const options = mailable.getMailOptions();
+      await this.fakeInstance!.at(options as MailOptions, date, mailable);
+      return { success: true, jobId: `fake-${Date.now()}`, queue: 'mail' };
+    }
+    mailable.setMailManager(this.getInstance());
+    return this.getInstance().at(mailable.getMailOptions() as MailOptions, date);
+  }
+
+  /**
+   * Process queued emails
+   */
+  static async processQueue(queueName?: string): Promise<void> {
+    if (this.isFaking()) {
+      // In fake mode, there's nothing to process
+      return;
+    }
+    return this.getInstance().processQueue(queueName);
+  }
+
   // ==================== Testing Methods ====================
 
   /**
@@ -98,7 +150,7 @@ class MailFacade {
    * Assert that a mailable was sent
    */
   static assertSent<T extends Mailable>(
-    mailableClass: new (...args: unknown[]) => T,
+    mailableClass: new (...args: any[]) => T,
     callback?: (message: AssertableMessage) => boolean
   ): void {
     if (!this.fakeInstance) {
@@ -111,7 +163,7 @@ class MailFacade {
    * Assert that a mailable was sent a specific number of times
    */
   static assertSentCount<T extends Mailable>(
-    mailableClass: new (...args: unknown[]) => T,
+    mailableClass: new (...args: any[]) => T,
     count: number
   ): void {
     if (!this.fakeInstance) {
@@ -124,7 +176,7 @@ class MailFacade {
    * Assert that a mailable was not sent
    */
   static assertNotSent<T extends Mailable>(
-    mailableClass: new (...args: unknown[]) => T,
+    mailableClass: new (...args: any[]) => T,
     callback?: (message: AssertableMessage) => boolean
   ): void {
     if (!this.fakeInstance) {
@@ -147,7 +199,7 @@ class MailFacade {
    * Assert that a mailable was queued
    */
   static assertQueued<T extends Mailable>(
-    mailableClass: new (...args: unknown[]) => T,
+    mailableClass: new (...args: any[]) => T,
     callback?: (message: AssertableMessage) => boolean
   ): void {
     if (!this.fakeInstance) {
@@ -160,7 +212,7 @@ class MailFacade {
    * Assert that a mailable was queued a specific number of times
    */
   static assertQueuedCount<T extends Mailable>(
-    mailableClass: new (...args: unknown[]) => T,
+    mailableClass: new (...args: any[]) => T,
     count: number
   ): void {
     if (!this.fakeInstance) {
@@ -173,7 +225,7 @@ class MailFacade {
    * Assert that a mailable was not queued
    */
   static assertNotQueued<T extends Mailable>(
-    mailableClass: new (...args: unknown[]) => T,
+    mailableClass: new (...args: any[]) => T,
     callback?: (message: AssertableMessage) => boolean
   ): void {
     if (!this.fakeInstance) {
@@ -196,7 +248,7 @@ class MailFacade {
    * Get all sent messages (optionally filtered by mailable class)
    */
   static sent<T extends Mailable>(
-    mailableClass?: new (...args: unknown[]) => T
+    mailableClass?: new (...args: any[]) => T
   ): AssertableMessage[] {
     if (!this.fakeInstance) {
       throw new Error('Mail::fake() must be called before using sent().');
@@ -208,7 +260,7 @@ class MailFacade {
    * Get all queued messages (optionally filtered by mailable class)
    */
   static queued<T extends Mailable>(
-    mailableClass?: new (...args: unknown[]) => T
+    mailableClass?: new (...args: any[]) => T
   ): AssertableMessage[] {
     if (!this.fakeInstance) {
       throw new Error('Mail::fake() must be called before using queued().');
@@ -345,26 +397,118 @@ class FakeableMessageBuilder {
     return realManager.send(this.options as MailOptions);
   }
 
-  async queue(mailable?: Mailable): Promise<MailResponse> {
+  async queue(mailable?: Mailable): Promise<QueueJobResult> {
     // If using MailFake
     if (this.manager instanceof MailFake) {
       if (mailable) {
         const mailOptions = mailable.getMailOptions();
-        return this.manager.queue(
+        await this.manager.queue(
           { ...mailOptions, to: this.options.to! } as MailOptions,
           mailable
         );
+      } else {
+        if (!this.options.subject) {
+          throw new Error('Email subject is required');
+        }
+        await this.manager.queue(this.options as MailOptions);
       }
-
-      if (!this.options.subject) {
-        throw new Error('Email subject is required');
-      }
-
-      return this.manager.queue(this.options as MailOptions);
+      return { success: true, jobId: `fake-${Date.now()}`, queue: 'mail' };
     }
 
-    // Queue not yet implemented for real mailer
-    throw new Error('Queue functionality not yet implemented. Use Mail.fake() for testing queue assertions.');
+    // If using real MailManager
+    const realManager = this.manager;
+    if (!(realManager instanceof MailManager)) {
+      throw new Error('Invalid mail manager');
+    }
+
+    const mailOptions = this.getMailOptions(mailable);
+    return realManager.queue(mailOptions);
+  }
+
+  /**
+   * Queue the email with a delay (in seconds)
+   */
+  async later(delaySeconds: number, mailable?: Mailable): Promise<QueueJobResult> {
+    // If using MailFake
+    if (this.manager instanceof MailFake) {
+      if (mailable) {
+        const mailOptions = mailable.getMailOptions();
+        await this.manager.later(
+          { ...mailOptions, to: this.options.to! } as MailOptions,
+          delaySeconds,
+          mailable
+        );
+      } else {
+        if (!this.options.subject) {
+          throw new Error('Email subject is required');
+        }
+        await this.manager.later(this.options as MailOptions, delaySeconds);
+      }
+      return { success: true, jobId: `fake-${Date.now()}`, queue: 'mail' };
+    }
+
+    // If using real MailManager
+    const realManager = this.manager;
+    if (!(realManager instanceof MailManager)) {
+      throw new Error('Invalid mail manager');
+    }
+
+    const mailOptions = this.getMailOptions(mailable);
+    return realManager.later(mailOptions, delaySeconds);
+  }
+
+  /**
+   * Schedule the email for a specific time
+   */
+  async at(date: Date, mailable?: Mailable): Promise<QueueJobResult> {
+    // If using MailFake
+    if (this.manager instanceof MailFake) {
+      if (mailable) {
+        const mailOptions = mailable.getMailOptions();
+        await this.manager.at(
+          { ...mailOptions, to: this.options.to! } as MailOptions,
+          date,
+          mailable
+        );
+      } else {
+        if (!this.options.subject) {
+          throw new Error('Email subject is required');
+        }
+        await this.manager.at(this.options as MailOptions, date);
+      }
+      return { success: true, jobId: `fake-${Date.now()}`, queue: 'mail' };
+    }
+
+    // If using real MailManager
+    const realManager = this.manager;
+    if (!(realManager instanceof MailManager)) {
+      throw new Error('Invalid mail manager');
+    }
+
+    const mailOptions = this.getMailOptions(mailable);
+    return realManager.at(mailOptions, date);
+  }
+
+  /**
+   * Get mail options from builder or mailable
+   */
+  private getMailOptions(mailable?: Mailable): MailOptions {
+    if (mailable) {
+      if (this.manager instanceof MailManager) {
+        mailable.setMailManager(this.manager);
+      }
+      const mailOptions = mailable.getMailOptions();
+      return {
+        ...mailOptions,
+        to: this.options.to!,
+      } as MailOptions;
+    }
+
+    if (!this.options.subject) {
+      throw new Error('Email subject is required');
+    }
+
+    return this.options as MailOptions;
   }
 }
 

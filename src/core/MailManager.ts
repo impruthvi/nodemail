@@ -10,6 +10,7 @@ import type {
   MailResponse,
   MailerConfig,
   Attachment,
+  QueueJobResult,
 } from '../types';
 import { SmtpProvider } from '../providers/SmtpProvider';
 import { SendGridProvider } from '../providers/SendGridProvider';
@@ -21,15 +22,18 @@ import type { TemplateEngine, TemplateEngineOptions } from '../templates/Templat
 import { HandlebarsEngine } from '../templates/HandlebarsEngine';
 import { EjsEngine } from '../templates/EjsEngine';
 import { PugEngine } from '../templates/PugEngine';
+import { QueueManager } from '../queue/QueueManager';
 
 export class MailManager {
   private config: MailConfig;
   private providers: Map<string, MailProvider> = new Map();
   private templateEngine?: TemplateEngine;
+  private queueManager?: QueueManager;
 
   constructor(config: MailConfig) {
     this.config = config;
     this.initializeTemplateEngine();
+    this.initializeQueueManager();
   }
 
   /**
@@ -74,6 +78,65 @@ export class MailManager {
     }
   }
   /* eslint-enable @typescript-eslint/restrict-template-expressions */
+
+  /**
+   * Initialize queue manager if configured
+   */
+  private initializeQueueManager(): void {
+    if (!this.config.queue) {
+      return;
+    }
+    this.queueManager = new QueueManager(this.config.queue);
+  }
+
+  /**
+   * Get the queue manager
+   */
+  getQueueManager(): QueueManager | undefined {
+    return this.queueManager;
+  }
+
+  /**
+   * Queue an email for background sending
+   */
+  async queue(options: MailOptions): Promise<QueueJobResult> {
+    if (!this.queueManager) {
+      throw new Error('Queue not configured. Add queue configuration to Mail.configure()');
+    }
+    return this.queueManager.queue(options);
+  }
+
+  /**
+   * Queue an email with a delay (in seconds)
+   */
+  async later(options: MailOptions, delaySeconds: number): Promise<QueueJobResult> {
+    if (!this.queueManager) {
+      throw new Error('Queue not configured. Add queue configuration to Mail.configure()');
+    }
+    return this.queueManager.later(options, delaySeconds);
+  }
+
+  /**
+   * Schedule an email for a specific time
+   */
+  async at(options: MailOptions, date: Date): Promise<QueueJobResult> {
+    if (!this.queueManager) {
+      throw new Error('Queue not configured. Add queue configuration to Mail.configure()');
+    }
+    return this.queueManager.at(options, date);
+  }
+
+  /**
+   * Start processing queued emails
+   */
+  async processQueue(queueName?: string): Promise<void> {
+    if (!this.queueManager) {
+      throw new Error('Queue not configured. Add queue configuration to Mail.configure()');
+    }
+    await this.queueManager.process(async (job) => {
+      return this.send(job.mailOptions);
+    }, queueName);
+  }
 
   /**
    * Create a provider instance based on configuration
@@ -240,7 +303,7 @@ export class MessageBuilder {
     if (mailable) {
       mailable.setMailManager(this.manager);
       const mailOptions = mailable.getMailOptions();
-      
+
       // Merge the recipient from builder with mailable options
       return this.manager.send({
         ...mailOptions,
@@ -254,5 +317,49 @@ export class MessageBuilder {
     }
 
     return this.manager.send(this.options as MailOptions);
+  }
+
+  /**
+   * Queue the email for background sending
+   */
+  async queue(mailable?: import('./Mailable').Mailable): Promise<QueueJobResult> {
+    const mailOptions = this.getMailOptions(mailable);
+    return this.manager.queue(mailOptions);
+  }
+
+  /**
+   * Queue the email with a delay (in seconds)
+   */
+  async later(delaySeconds: number, mailable?: import('./Mailable').Mailable): Promise<QueueJobResult> {
+    const mailOptions = this.getMailOptions(mailable);
+    return this.manager.later(mailOptions, delaySeconds);
+  }
+
+  /**
+   * Schedule the email for a specific time
+   */
+  async at(date: Date, mailable?: import('./Mailable').Mailable): Promise<QueueJobResult> {
+    const mailOptions = this.getMailOptions(mailable);
+    return this.manager.at(mailOptions, date);
+  }
+
+  /**
+   * Get mail options from builder or mailable
+   */
+  private getMailOptions(mailable?: import('./Mailable').Mailable): MailOptions {
+    if (mailable) {
+      mailable.setMailManager(this.manager);
+      const mailOptions = mailable.getMailOptions();
+      return {
+        ...mailOptions,
+        to: this.options.to!,
+      } as MailOptions;
+    }
+
+    if (!this.options.subject) {
+      throw new Error('Email subject is required');
+    }
+
+    return this.options as MailOptions;
   }
 }

@@ -20,6 +20,9 @@ export { PostmarkProvider } from './providers/PostmarkProvider';
 export type { TemplateEngine, TemplateEngineOptions } from './templates';
 export { HandlebarsEngine, EjsEngine, PugEngine } from './templates';
 
+// Queue
+export { QueueManager, BullMQDriver, BullDriver } from './queue';
+
 // Testing Utilities
 export { MailFake, AssertableMessage } from './testing';
 export type { SentMessage } from './testing';
@@ -28,4 +31,4 @@ export type { SentMessage } from './testing';
 export * from './types';
 
 // Version
-export const VERSION = '0.5.0';
+export const VERSION = '0.6.0';

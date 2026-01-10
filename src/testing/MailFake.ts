@@ -63,9 +63,24 @@ export class MailFake implements MailProvider {
   }
 
   /**
+   * Fake later - stores message in queue with delay (for testing)
+   */
+  later(options: MailOptions, _delaySeconds: number, mailable?: Mailable): Promise<MailResponse> {
+    return this.queue(options, mailable);
+  }
+
+  /**
+   * Fake at - stores message in queue for specific time (for testing)
+   */
+  at(options: MailOptions, _date: Date, mailable?: Mailable): Promise<MailResponse> {
+    return this.queue(options, mailable);
+  }
+
+  /**
    * Get all sent messages
    */
-  sent<T extends Mailable>(mailableClass?: new (...args: unknown[]) => T): AssertableMessage[] {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sent<T extends Mailable>(mailableClass?: new (...args: any[]) => T): AssertableMessage[] {
     let messages = this.sentMessages;
 
     if (mailableClass) {
@@ -78,7 +93,7 @@ export class MailFake implements MailProvider {
   /**
    * Get all queued messages
    */
-  queued<T extends Mailable>(mailableClass?: new (...args: unknown[]) => T): AssertableMessage[] {
+  queued<T extends Mailable>(mailableClass?: new (...args: any[]) => T): AssertableMessage[] {
     let messages = this.queuedMessages;
 
     if (mailableClass) {
@@ -92,7 +107,7 @@ export class MailFake implements MailProvider {
    * Assert that a mailable was sent
    */
   assertSent<T extends Mailable>(
-    mailableClass: new (...args: unknown[]) => T,
+    mailableClass: new (...args: any[]) => T,
     callback?: (message: AssertableMessage) => boolean
   ): void {
     const messages = this.sent(mailableClass);
@@ -117,7 +132,7 @@ export class MailFake implements MailProvider {
    * Assert that a mailable was sent a specific number of times
    */
   assertSentCount<T extends Mailable>(
-    mailableClass: new (...args: unknown[]) => T,
+    mailableClass: new (...args: any[]) => T,
     count: number
   ): void {
     const messages = this.sent(mailableClass);
@@ -133,7 +148,7 @@ export class MailFake implements MailProvider {
    * Assert that a mailable was not sent
    */
   assertNotSent<T extends Mailable>(
-    mailableClass: new (...args: unknown[]) => T,
+    mailableClass: new (...args: any[]) => T,
     callback?: (message: AssertableMessage) => boolean
   ): void {
     const messages = this.sent(mailableClass);
@@ -170,7 +185,7 @@ export class MailFake implements MailProvider {
    * Assert that a mailable was queued
    */
   assertQueued<T extends Mailable>(
-    mailableClass: new (...args: unknown[]) => T,
+    mailableClass: new (...args: any[]) => T,
     callback?: (message: AssertableMessage) => boolean
   ): void {
     const messages = this.queued(mailableClass);
@@ -195,7 +210,7 @@ export class MailFake implements MailProvider {
    * Assert that a mailable was queued a specific number of times
    */
   assertQueuedCount<T extends Mailable>(
-    mailableClass: new (...args: unknown[]) => T,
+    mailableClass: new (...args: any[]) => T,
     count: number
   ): void {
     const messages = this.queued(mailableClass);
@@ -211,7 +226,7 @@ export class MailFake implements MailProvider {
    * Assert that a mailable was not queued
    */
   assertNotQueued<T extends Mailable>(
-    mailableClass: new (...args: unknown[]) => T,
+    mailableClass: new (...args: any[]) => T,
     callback?: (message: AssertableMessage) => boolean
   ): void {
     const messages = this.queued(mailableClass);

@@ -12,6 +12,7 @@ export interface MailConfig {
   };
   mailers: Record<string, MailerConfig>;
   templates?: TemplateConfig;
+  queue?: QueueConfig;
 }
 
 export interface TemplateConfig {
@@ -116,4 +117,75 @@ export interface MailResponse {
   rejected?: string[];
   response?: string;
   error?: string;
+}
+
+// ==================== Queue Types ====================
+
+export interface QueueConfig {
+  driver: 'bull' | 'bullmq' | 'sync';
+  connection?: RedisConnectionConfig;
+  defaultQueue?: string;
+  prefix?: string;
+  retries?: number;
+  backoff?: BackoffConfig;
+}
+
+export interface RedisConnectionConfig {
+  host?: string;
+  port?: number;
+  password?: string;
+  db?: number;
+  url?: string;
+}
+
+export interface BackoffConfig {
+  type: 'fixed' | 'exponential';
+  delay: number;
+}
+
+export interface QueuedMailJob {
+  id: string;
+  mailOptions: MailOptions;
+  mailableClass?: string;
+  mailableData?: Record<string, unknown>;
+  attempts: number;
+  maxAttempts: number;
+  delay?: number;
+  scheduledAt?: Date;
+  createdAt: Date;
+}
+
+export interface QueueJobResult {
+  success: boolean;
+  jobId: string;
+  queue: string;
+  scheduledAt?: Date;
+  error?: string;
+}
+
+export interface QueueDriver {
+  /**
+   * Add a job to the queue
+   */
+  add(job: QueuedMailJob, queueName?: string): Promise<QueueJobResult>;
+
+  /**
+   * Add a delayed job to the queue
+   */
+  addDelayed(job: QueuedMailJob, delay: number, queueName?: string): Promise<QueueJobResult>;
+
+  /**
+   * Add a job scheduled for a specific time
+   */
+  addScheduled(job: QueuedMailJob, date: Date, queueName?: string): Promise<QueueJobResult>;
+
+  /**
+   * Process jobs from the queue
+   */
+  process(queueName: string, handler: (job: QueuedMailJob) => Promise<MailResponse>): void;
+
+  /**
+   * Close the queue connection
+   */
+  close(): Promise<void>;
 }
