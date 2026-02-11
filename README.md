@@ -3,7 +3,7 @@
 [![npm version](https://badge.fury.io/js/@impruthvi%2Fnodemail.svg)](https://www.npmjs.com/package/@impruthvi/nodemail)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/tests-172%20passing-brightgreen)](https://github.com/impruthvi/nodemail)
+[![Tests](https://img.shields.io/badge/tests-246%20passing-brightgreen)](https://github.com/impruthvi/nodemail)
 [![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](https://github.com/impruthvi/nodemail)
 
 **@impruthvi/nodemail** brings the simplicity and elegance of Laravel's Mail system to the Node.js ecosystem with full TypeScript support.
@@ -12,7 +12,7 @@
 
 A lightweight, developer-friendly email library where you can:
 - Switch email providers by just changing environment variables
-- Use elegant, class-based Mailable patterns  
+- Use elegant, class-based Mailable patterns
 - Keep your package lightweight (install only what you need)
 - Write clean, maintainable email code
 
@@ -20,10 +20,12 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 
 ## ✨ Features
 
-### ✅ Available Now (v0.5.0)
+### ✅ Available Now (v0.7.0)
 - 🎯 **Multiple Providers** - SMTP (Nodemailer), SendGrid, AWS SES, Mailgun, Resend, Postmark
 - 🎨 **Template Engines** - Handlebars, EJS, Pug support with dynamic loading
 - 📝 **Mailable Classes** - Reusable email definitions with template support
+- 📋 **Markdown Mail** - Write emails in Markdown with components (button, panel, table)
+- 📦 **Queue Support** - Background email sending with Bull/BullMQ
 - 🧪 **Testing Utilities** - Mail::fake() for testing (Laravel-style assertions)
 - 🪶 **Lightweight** - Only ~25MB with SMTP, install additional providers as needed
 - 🔒 **Type-Safe** - Full TypeScript support with strict typing
@@ -33,10 +35,9 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 
 ### 🚧 Coming Soon
 - 🔔 **Notifications** - Multi-channel notification system
-- 📋 **Markdown Mail** - Beautiful emails from markdown
-- 📦 **Queue Support** - Background email sending (Bull/BullMQ)
 - 🌍 **i18n Support** - Multi-language emails
 - 🚀 **More Providers** - Mailtrap and others
+- 🎨 **Enhanced CLI** - Command-line tools for queue management
 
 ## 📦 Installation
 
@@ -46,7 +47,7 @@ npm install @impruthvi/nodemail
 
 Or install a specific version:
 ```bash
-npm install @impruthvi/nodemail@0.5.0
+npm install @impruthvi/nodemail@0.7.0
 ```
 
 **Lightweight by default!** Only includes SMTP support (~25MB).
@@ -83,6 +84,12 @@ npm install ejs
 
 # Pug (✅ Implemented)
 npm install pug
+```
+
+### Adding Markdown Mail Support (Optional)
+
+```bash
+npm install marked juice
 ```
 
 ## 🚀 Quick Start
@@ -284,6 +291,132 @@ await Mail.to('user@example.com')
   .send();
 ```
 
+## 📋 Markdown Mail
+
+Write beautiful emails in Markdown with built-in components. Requires `npm install marked juice`.
+
+### MarkdownMailable
+
+```typescript
+import { MarkdownMailable, Mail } from '@impruthvi/nodemail';
+
+class WelcomeEmail extends MarkdownMailable {
+  constructor(
+    private user: { name: string },
+    private appName: string
+  ) {
+    super();
+  }
+
+  build(): this {
+    return this
+      .subject(`Welcome to ${this.appName}!`)
+      .from('noreply@example.com')
+      .markdown(`# Welcome, {{name}}!
+
+Thank you for joining **{{appName}}**.
+
+[button url="https://example.com/start" color="primary"]Get Started[/button]
+
+[panel]Need help? Contact support@example.com[/panel]`, {
+        name: this.user.name,
+        appName: this.appName,
+      });
+  }
+}
+
+await Mail.to('user@example.com').send(new WelcomeEmail(user, 'My App'));
+```
+
+### Components
+
+**Button** - Call-to-action buttons with color variants:
+```markdown
+[button url="https://example.com" color="primary"]Click Here[/button]
+[button url="https://example.com" color="success"]Confirm[/button]
+[button url="https://example.com" color="error"]Delete[/button]
+```
+
+**Panel** - Bordered callout sections:
+```markdown
+[panel]
+**Important:** This is a highlighted notice.
+[/panel]
+```
+
+**Table** - Styled table wrapper:
+```markdown
+[table]
+| Name  | Price  |
+|-------|--------|
+| Item  | $9.99  |
+[/table]
+```
+
+### Custom Themes
+
+```typescript
+class BrandedEmail extends MarkdownMailable {
+  build(): this {
+    return this
+      .subject('Update')
+      .markdown('# News\n\nLatest updates...')
+      .theme({
+        css: 'h1 { color: #e94560; } .button-primary { background: #e94560; }',
+        headerHtml: '<img src="https://example.com/logo.png" alt="Logo">',
+        footerHtml: '<p>&copy; 2026 Company</p>',
+      });
+  }
+}
+```
+
+### Markdown Configuration
+
+```typescript
+Mail.configure({
+  // ... mailer config
+  markdown: {
+    theme: {
+      css: '/* custom global CSS */',
+      headerHtml: '<img src="logo.png">',
+      footerHtml: '<p>Footer</p>',
+    },
+    customCss: '.button { border-radius: 8px; }',
+  },
+});
+```
+
+## 📦 Queue Support
+
+Send emails in the background with Bull or BullMQ. Requires `npm install bullmq` (or `bull`).
+
+```typescript
+Mail.configure({
+  // ... mailer config
+  queue: {
+    driver: 'bullmq',
+    connection: { host: 'localhost', port: 6379 },
+    retries: 3,
+    backoff: { type: 'exponential', delay: 1000 },
+  },
+});
+
+// Queue immediately
+await Mail.to('user@example.com')
+  .subject('Welcome!')
+  .html('<h1>Welcome!</h1>')
+  .queue();
+
+// Delayed sending (60 seconds)
+await Mail.to('user@example.com').later(60, new WelcomeEmail(user));
+
+// Scheduled delivery
+await Mail.to('user@example.com').at(new Date('2026-12-25'), new ChristmasEmail());
+
+// Process queued emails (in worker)
+await Mail.processQueue();
+```
+
 ## 📨 Complete Fluent API
 
 ```typescript
@@ -427,6 +560,11 @@ sent.subjectContains('Welcome');     // Subject contains
 sent.htmlContains('Hello');          // HTML contains
 sent.textContains('Hello');          // Plain text contains
 
+// Check markdown
+sent.isMarkdown();                   // Was built from markdown
+sent.getMarkdown();                  // Get raw markdown source
+sent.markdownContains('[button');    // Markdown source contains
+
 // Check attachments
 sent.hasAttachments();               // Has any attachments
 sent.hasAttachment('file.pdf');      // Has specific attachment
@@ -478,15 +616,27 @@ sent.getHtml();                      // Get HTML content
 - ✅ assertSent(), assertNotSent(), assertNothingSent()
 - ✅ assertQueued(), assertNothingQueued()
 - ✅ AssertableMessage with inspection methods
-- ✅ Comprehensive test suite (172 tests)
-- ✅ 85%+ code coverage
 
-**Phase 6: Advanced Features** 🚧 Coming Soon
-- Queue integration (Bull/BullMQ)
-- CLI tools
-- Markdown mail support
-- Multi-channel notifications
-- i18n support
+**Phase 6: Queue Management** ✅ Complete (v0.6.0)
+- ✅ QueueManager with Bull and BullMQ drivers
+- ✅ Immediate, delayed, and scheduled sending
+- ✅ Automatic retries with configurable backoff
+- ✅ MailFake queue assertion support
+
+**Phase 7: Markdown Mail** ✅ Complete (v0.7.0)
+- ✅ MarkdownMailable base class
+- ✅ MarkdownRenderer with CSS inlining
+- ✅ Components: button, panel, table
+- ✅ Default responsive email theme
+- ✅ Custom themes and CSS support
+- ✅ AssertableMessage markdown assertions
+- ✅ 246 passing tests
+
+**Phase 8+** 🚧 Coming Soon
+- 🔔 Notifications - Multi-channel notification system
+- 🌍 i18n Support - Multi-language emails
+- 🎨 Enhanced CLI - Command-line tools
+- 🚀 More Providers - Mailtrap and others
 
 ## 🤝 Contributing
 
@@ -549,7 +699,7 @@ Unlike other packages that bundle everything:
 - **Type-Safe**: Full TypeScript support with strict typing
 - **Developer-Friendly**: Clean, intuitive API
 - **Production-Ready**: Built with best practices
-- **Well-Tested**: 172 passing tests with 85%+ coverage
+- **Well-Tested**: 246 passing tests with 85%+ coverage
 
 ## 📄 License
 

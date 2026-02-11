@@ -23,6 +23,8 @@ import { HandlebarsEngine } from '../templates/HandlebarsEngine';
 import { EjsEngine } from '../templates/EjsEngine';
 import { PugEngine } from '../templates/PugEngine';
 import { QueueManager } from '../queue/QueueManager';
+import { MarkdownRenderer } from '../markdown/MarkdownRenderer';
+import type { MarkdownRendererOptions } from '../markdown/MarkdownRenderer';
 
 export class MailManager {
   private config: MailConfig;
@@ -209,6 +211,71 @@ export class MailManager {
    * Send an email using the default mailer
    */
   async send(options: MailOptions): Promise<MailResponse> {
+    // Render markdown if present
+    if (options.data?.['__markdown']) {
+      const markdownContent = options.data['__markdown'] as string;
+      const mailableOverrides = (options.data['__markdownRendererOptions'] || {}) as Record<string, unknown>;
+
+      // Build renderer options from global config + mailable overrides
+      const rendererOptions: MarkdownRendererOptions = {};
+
+      // Apply global markdown config
+      if (this.config.markdown?.theme) {
+        const themeCfg = this.config.markdown.theme;
+        rendererOptions.theme = {
+          css: themeCfg.css || '',
+          ...(themeCfg.headerHtml !== undefined ? { headerHtml: themeCfg.headerHtml } : {}),
+          ...(themeCfg.footerHtml !== undefined ? { footerHtml: themeCfg.footerHtml } : {}),
+        };
+      }
+      if (this.config.markdown?.customCss) {
+        rendererOptions.customCss = this.config.markdown.customCss;
+      }
+
+      // Apply mailable-level overrides
+      if (mailableOverrides['theme'] !== undefined) {
+        rendererOptions.theme = mailableOverrides['theme'] as NonNullable<MarkdownRendererOptions['theme']>;
+      }
+      if (mailableOverrides['customCss']) {
+        rendererOptions.customCss = mailableOverrides['customCss'] as string;
+      }
+
+      const renderer = new MarkdownRenderer(rendererOptions);
+
+      // Collect user data (exclude internal keys)
+      const userData: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(options.data)) {
+        if (key !== '__markdown' && key !== '__markdownRendererOptions') {
+          userData[key] = value;
+        }
+      }
+
+      const { html, text } = await renderer.render(
+        markdownContent,
+        Object.keys(userData).length > 0 ? userData : undefined
+      );
+
+      // Set html and text if not already provided
+      options = {
+        ...options,
+        html: options.html || html,
+        text: options.text || text,
+      };
+
+      // Clean internal keys from data
+      const cleanData = { ...options.data };
+      delete cleanData['__markdown'];
+      delete cleanData['__markdownRendererOptions'];
+      const hasRemainingData = Object.keys(cleanData).length > 0;
+      options = {
+        ...options,
+        ...(hasRemainingData ? { data: cleanData } : {}),
+      };
+      if (!hasRemainingData) {
+        delete (options as unknown as Record<string, unknown>)['data'];
+      }
+    }
+
     // Render template if specified
     if (options.template && this.templateEngine) {
       const html = await this.templateEngine.renderFile(

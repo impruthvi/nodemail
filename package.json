@@ -1,6 +1,6 @@
 {
   "name": "@impruthvi/nodemail",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "A unified mail service for Node.js/TypeScript with Laravel-like simplicity. Support for multiple providers (SMTP, SendGrid, AWS SES, Mailgun, Resend, Postmark) and template engines (Handlebars, EJS, Pug) - just change environment variables, no code changes needed.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

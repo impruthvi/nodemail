@@ -4,6 +4,15 @@
 
 import type { TemplateEngine } from '../templates/TemplateEngine';
 
+export interface MarkdownConfig {
+  theme?: {
+    css?: string;
+    headerHtml?: string;
+    footerHtml?: string;
+  };
+  customCss?: string;
+}
+
 export interface MailConfig {
   default: string;
   from: {
@@ -13,6 +22,7 @@ export interface MailConfig {
   mailers: Record<string, MailerConfig>;
   templates?: TemplateConfig;
   queue?: QueueConfig;
+  markdown?: MarkdownConfig;
 }
 
 export interface TemplateConfig {

@@ -23,6 +23,10 @@ export { HandlebarsEngine, EjsEngine, PugEngine } from './templates';
 // Queue
 export { QueueManager, BullMQDriver, BullDriver } from './queue';
 
+// Markdown Mail
+export { MarkdownRenderer, MarkdownMailable, getDefaultTheme } from './markdown';
+export type { MarkdownRendererOptions, MarkdownTheme } from './markdown';
+
 // Testing Utilities
 export { MailFake, AssertableMessage } from './testing';
 export type { SentMessage } from './testing';
@@ -31,4 +35,4 @@ export type { SentMessage } from './testing';
 export * from './types';
 
 // Version
-export const VERSION = '0.6.0';
+export const VERSION = '0.7.0';

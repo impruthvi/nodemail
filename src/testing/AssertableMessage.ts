@@ -256,6 +256,31 @@ export class AssertableMessage {
     return this.options.template;
   }
 
+  // ==================== Markdown ====================
+
+  /**
+   * Check if the message was built from markdown
+   */
+  isMarkdown(): boolean {
+    return !!this.options.data?.['__markdown'];
+  }
+
+  /**
+   * Get the raw markdown source
+   */
+  getMarkdown(): string | undefined {
+    return this.options.data?.['__markdown'] as string | undefined;
+  }
+
+  /**
+   * Check if the markdown source contains a string
+   */
+  markdownContains(text: string): boolean {
+    const markdown = this.getMarkdown();
+    if (!markdown) return false;
+    return markdown.includes(text);
+  }
+
   /**
    * Helper to check if a recipient is in a list
    */
