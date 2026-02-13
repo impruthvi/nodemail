@@ -23,6 +23,7 @@ export interface MailConfig {
   templates?: TemplateConfig;
   queue?: QueueConfig;
   markdown?: MarkdownConfig;
+  failover?: FailoverConfig;
 }
 
 export interface TemplateConfig {
@@ -35,6 +36,7 @@ export interface TemplateConfig {
 
 export interface MailerConfig {
   driver: 'smtp' | 'sendgrid' | 'ses' | 'mailgun' | 'resend' | 'postmark' | 'mailtrap';
+  failover?: FailoverConfig;
   [key: string]: unknown;
 }
 
@@ -127,6 +129,34 @@ export interface MailResponse {
   rejected?: string[];
   response?: string;
   error?: string;
+  provider?: string;
+  failoverUsed?: boolean;
+  failoverAttempts?: FailoverDetail[];
+}
+
+// ==================== Failover Types ====================
+
+export interface FailoverConfig {
+  chain: string[];
+  maxRetriesPerProvider?: number;  // default: 1
+  retryDelay?: number;             // default: 0
+  failoverDelay?: number;          // default: 0
+  onFailover?: (event: FailoverEvent) => void;
+}
+
+export interface FailoverEvent {
+  failedMailer: string;
+  error: string;
+  nextMailer: string;
+  attemptIndex: number;
+  timestamp: string;
+}
+
+export interface FailoverDetail {
+  mailer: string;
+  success: boolean;
+  error?: string;
+  durationMs: number;
 }
 
 // ==================== Queue Types ====================

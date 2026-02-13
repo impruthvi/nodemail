@@ -7,6 +7,7 @@ export { Mail } from './core/MailFacade';
 export { MailManager } from './core/MailManager';
 export { Mailable } from './core/Mailable';
 export { Message } from './core/Message';
+export { FailoverManager } from './core/FailoverManager';
 
 // Providers
 export { SmtpProvider } from './providers/SmtpProvider';
@@ -35,4 +36,4 @@ export type { SentMessage } from './testing';
 export * from './types';
 
 // Version
-export const VERSION = '0.7.0';
+export const VERSION = '1.0.0';

@@ -3,7 +3,7 @@
 [![npm version](https://badge.fury.io/js/@impruthvi%2Fnodemail.svg)](https://www.npmjs.com/package/@impruthvi/nodemail)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/tests-246%20passing-brightgreen)](https://github.com/impruthvi/nodemail)
+[![Tests](https://img.shields.io/badge/tests-269%20passing-brightgreen)](https://github.com/impruthvi/nodemail)
 [![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](https://github.com/impruthvi/nodemail)
 
 **@impruthvi/nodemail** brings the simplicity and elegance of Laravel's Mail system to the Node.js ecosystem with full TypeScript support.
@@ -20,12 +20,13 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 
 ## ✨ Features
 
-### ✅ Available Now (v0.7.0)
+### ✅ Available Now (v1.0.0)
 - 🎯 **Multiple Providers** - SMTP (Nodemailer), SendGrid, AWS SES, Mailgun, Resend, Postmark
 - 🎨 **Template Engines** - Handlebars, EJS, Pug support with dynamic loading
 - 📝 **Mailable Classes** - Reusable email definitions with template support
 - 📋 **Markdown Mail** - Write emails in Markdown with components (button, panel, table)
 - 📦 **Queue Support** - Background email sending with Bull/BullMQ
+- 🔄 **Provider Failover** - Automatic failover chain with retries, delays, and callbacks
 - 🧪 **Testing Utilities** - Mail::fake() for testing (Laravel-style assertions)
 - 🪶 **Lightweight** - Only ~25MB with SMTP, install additional providers as needed
 - 🔒 **Type-Safe** - Full TypeScript support with strict typing
@@ -47,7 +48,7 @@ npm install @impruthvi/nodemail
 
 Or install a specific version:
 ```bash
-npm install @impruthvi/nodemail@0.7.0
+npm install @impruthvi/nodemail@1.0.0
 ```
 
 **Lightweight by default!** Only includes SMTP support (~25MB).
@@ -417,6 +418,118 @@ await Mail.to('user@example.com').at(new Date('2026-12-25'), new ChristmasEmail(
 await Mail.processQueue();
 ```
 
+## 🔄 Provider Failover
+
+Automatically fail over to backup providers when the primary provider fails. Supports retries, delays, and monitoring callbacks.
+
+### Global Failover Configuration
+
+```typescript
+Mail.configure({
+  default: 'smtp',
+  from: { address: 'noreply@example.com', name: 'My App' },
+  mailers: {
+    smtp: {
+      driver: 'smtp',
+      host: process.env.SMTP_HOST,
+      port: 587,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    },
+    sendgrid: {
+      driver: 'sendgrid',
+      apiKey: process.env.SENDGRID_API_KEY,
+    },
+    ses: {
+      driver: 'ses',
+      region: 'us-east-1',
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+  },
+  failover: {
+    chain: ['sendgrid', 'ses'],
+    maxRetriesPerProvider: 2,
+    retryDelay: 1000,
+    failoverDelay: 500,
+  },
+});
+
+// Sends via SMTP first; if SMTP fails (after 2 retries), tries SendGrid, then SES
+await Mail.to('user@example.com')
+  .subject('Hello!')
+  .html('<h1>Hello!</h1>')
+  .send();
+```
+
+### Per-mailer Failover Override
+
+Override the global failover config for a specific mailer:
+
+```typescript
+Mail.configure({
+  default: 'smtp',
+  mailers: {
+    smtp: {
+      driver: 'smtp',
+      host: process.env.SMTP_HOST,
+      port: 587,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+      failover: {
+        chain: ['postmark'],       // Only fail over to Postmark for SMTP
+        maxRetriesPerProvider: 3,
+      },
+    },
+    postmark: {
+      driver: 'postmark',
+      serverToken: process.env.POSTMARK_SERVER_TOKEN,
+    },
+  },
+});
+```
+
+### onFailover Callback
+
+Monitor failover events for logging or alerting:
+
+```typescript
+Mail.configure({
+  // ... mailer config
+  failover: {
+    chain: ['sendgrid', 'ses'],
+    onFailover: (event) => {
+      console.log(`Failover: ${event.failedMailer} → ${event.nextMailer}`);
+      console.log(`Error: ${event.error}`);
+      console.log(`Attempt: ${event.attemptIndex}, Time: ${event.timestamp}`);
+    },
+  },
+});
+```
+
+### Response Metadata
+
+After sending, the response includes failover details:
+
+```typescript
+const result = await Mail.to('user@example.com')
+  .subject('Hello!')
+  .html('<h1>Hello!</h1>')
+  .send();
+
+console.log(result.provider);          // 'sendgrid' (which provider actually sent)
+console.log(result.failoverUsed);      // true (failover was triggered)
+console.log(result.failoverAttempts);  // Array of FailoverDetail objects
+```
+
+### FailoverConfig Reference
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `chain` | `string[]` | (required) | Ordered list of backup mailer names |
+| `maxRetriesPerProvider` | `number` | `1` | Retries per provider before moving to the next |
+| `retryDelay` | `number` | `0` | Delay (ms) between retries on the same provider |
+| `failoverDelay` | `number` | `0` | Delay (ms) before switching to the next provider |
+| `onFailover` | `(event: FailoverEvent) => void` | — | Callback fired on each failover transition |
+
 ## 📨 Complete Fluent API
 
 ```typescript
@@ -541,6 +654,10 @@ describe('User Registration', () => {
 | `Mail.assertNothingQueued()` | Assert nothing was queued |
 | `Mail.sent()` | Get all sent messages |
 | `Mail.sent(Mailable)` | Get sent messages of specific type |
+| `Mail.hasSent()` | Check if any messages were sent |
+| `Mail.hasQueued()` | Check if any messages were queued |
+| `Mail.simulateFailures(n)` | Simulate failures for the first N sends |
+| `Mail.resetFailures()` | Clear failure simulation state |
 
 ### AssertableMessage Methods
 
@@ -564,6 +681,11 @@ sent.textContains('Hello');          // Plain text contains
 sent.isMarkdown();                   // Was built from markdown
 sent.getMarkdown();                  // Get raw markdown source
 sent.markdownContains('[button');    // Markdown source contains
+
+// Check failover
+sent.wasFailoverUsed();              // Whether failover was triggered
+sent.getProvider();                  // Provider that actually sent
+sent.getFailoverAttempts();          // Array of FailoverDetail objects
 
 // Check attachments
 sent.hasAttachments();               // Has any attachments
@@ -630,9 +752,18 @@ sent.getHtml();                      // Get HTML content
 - ✅ Default responsive email theme
 - ✅ Custom themes and CSS support
 - ✅ AssertableMessage markdown assertions
-- ✅ 246 passing tests
 
-**Phase 8+** 🚧 Coming Soon
+**Phase 8: Provider Failover** ✅ Complete (v1.0.0)
+- ✅ FailoverManager with automatic provider chain
+- ✅ Configurable retries per provider (`maxRetriesPerProvider`)
+- ✅ Retry and failover delays (`retryDelay`, `failoverDelay`)
+- ✅ `onFailover` callback for monitoring/logging
+- ✅ Per-mailer failover overrides
+- ✅ MailFake `simulateFailures()` / `resetFailures()` for testing
+- ✅ Response metadata: `provider`, `failoverUsed`, `failoverAttempts`
+- ✅ 269 passing tests
+
+**Phase 9+** 🚧 Coming Soon
 - 🔔 Notifications - Multi-channel notification system
 - 🌍 i18n Support - Multi-language emails
 - 🎨 Enhanced CLI - Command-line tools
@@ -699,7 +830,7 @@ Unlike other packages that bundle everything:
 - **Type-Safe**: Full TypeScript support with strict typing
 - **Developer-Friendly**: Clean, intuitive API
 - **Production-Ready**: Built with best practices
-- **Well-Tested**: 246 passing tests with 85%+ coverage
+- **Well-Tested**: 269 passing tests with 85%+ coverage
 
 ## 📄 License
 

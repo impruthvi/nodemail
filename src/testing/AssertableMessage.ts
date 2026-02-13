@@ -3,13 +3,14 @@
  * Provides fluent methods to check message properties
  */
 
-import type { MailOptions, MailAddress, Attachment } from '../types';
+import type { MailOptions, MailAddress, Attachment, MailResponse, FailoverDetail } from '../types';
 import type { Mailable } from '../core/Mailable';
 
 export class AssertableMessage {
   constructor(
     private readonly options: MailOptions,
-    private readonly mailable?: Mailable
+    private readonly mailable?: Mailable,
+    private readonly response?: MailResponse,
   ) {}
 
   /**
@@ -254,6 +255,36 @@ export class AssertableMessage {
    */
   getTemplate(): string | undefined {
     return this.options.template;
+  }
+
+  // ==================== Failover ====================
+
+  /**
+   * Check if failover was used for this message
+   */
+  wasFailoverUsed(): boolean {
+    return this.response?.failoverUsed ?? false;
+  }
+
+  /**
+   * Get the provider that actually sent this message
+   */
+  getProvider(): string | undefined {
+    return this.response?.provider;
+  }
+
+  /**
+   * Get the failover attempt details
+   */
+  getFailoverAttempts(): FailoverDetail[] {
+    return this.response?.failoverAttempts ?? [];
+  }
+
+  /**
+   * Get the response associated with this message
+   */
+  getResponse(): MailResponse | undefined {
+    return this.response;
   }
 
   // ==================== Markdown ====================

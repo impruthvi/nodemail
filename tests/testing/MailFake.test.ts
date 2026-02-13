@@ -512,6 +512,31 @@ describe('MailFake class', () => {
     });
   });
 
+  describe('simulateFailures()', () => {
+    it('should return failure responses for the first N sends', async () => {
+      fake.simulateFailures(2);
+
+      const result1 = await fake.send({ to: 'a@test.com', subject: 'T1', html: '<p>1</p>' });
+      const result2 = await fake.send({ to: 'b@test.com', subject: 'T2', html: '<p>2</p>' });
+      const result3 = await fake.send({ to: 'c@test.com', subject: 'T3', html: '<p>3</p>' });
+
+      expect(result1.success).toBe(false);
+      expect(result1.error).toContain('Simulated failure');
+      expect(result2.success).toBe(false);
+      expect(result2.error).toContain('Simulated failure');
+      expect(result3.success).toBe(true);
+    });
+
+    it('should not store failed messages in sent list', async () => {
+      fake.simulateFailures(1);
+
+      await fake.send({ to: 'a@test.com', subject: 'T1', html: '<p>1</p>' });
+      await fake.send({ to: 'b@test.com', subject: 'T2', html: '<p>2</p>' });
+
+      expect(fake.sentCount()).toBe(1);
+    });
+  });
+
   describe('clear()', () => {
     it('should clear all messages', async () => {
       await fake.send({
@@ -532,6 +557,21 @@ describe('MailFake class', () => {
 
       expect(fake.sentCount()).toBe(0);
       expect(fake.queuedCount()).toBe(0);
+    });
+
+    it('should reset failure simulation state', async () => {
+      fake.simulateFailures(3);
+
+      // Send one failure
+      const result1 = await fake.send({ to: 'a@test.com', subject: 'T1', html: '<p>1</p>' });
+      expect(result1.success).toBe(false);
+
+      // Clear should reset failure tracking
+      fake.clear();
+
+      // Next send should succeed (failure state was reset)
+      const result2 = await fake.send({ to: 'b@test.com', subject: 'T2', html: '<p>2</p>' });
+      expect(result2.success).toBe(true);
     });
   });
 });

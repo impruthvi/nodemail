@@ -17,15 +17,43 @@ export interface SentMessage {
 export class MailFake implements MailProvider {
   private sentMessages: SentMessage[] = [];
   private queuedMessages: SentMessage[] = [];
+  private failureCount = 0;
+  private failuresSent = 0;
 
   constructor(_config?: MailConfig) {
     // Config stored for future use (queue configuration, etc.)
   }
 
   /**
+   * Simulate failures for the first N sends (returns { success: false })
+   */
+  simulateFailures(count: number): void {
+    this.failureCount = count;
+    this.failuresSent = 0;
+  }
+
+  /**
+   * Clear failure simulation state
+   */
+  resetFailures(): void {
+    this.failureCount = 0;
+    this.failuresSent = 0;
+  }
+
+  /**
    * Fake send - stores message instead of sending
+   * Respects simulateFailures() for testing failover scenarios
    */
   send(options: MailOptions, mailable?: Mailable): Promise<MailResponse> {
+    // Check if we should simulate a failure
+    if (this.failureCount > 0 && this.failuresSent < this.failureCount) {
+      this.failuresSent++;
+      return Promise.resolve({
+        success: false,
+        error: `Simulated failure (${this.failuresSent}/${this.failureCount})`,
+      });
+    }
+
     const message: SentMessage = {
       options,
       mailable,
@@ -293,6 +321,8 @@ export class MailFake implements MailProvider {
   clear(): void {
     this.sentMessages = [];
     this.queuedMessages = [];
+    this.failureCount = 0;
+    this.failuresSent = 0;
   }
 
   /**

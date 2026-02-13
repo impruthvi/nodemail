@@ -12,6 +12,7 @@ import type {
   Attachment,
   QueueJobResult,
 } from '../types';
+import { FailoverManager } from './FailoverManager';
 import { SmtpProvider } from '../providers/SmtpProvider';
 import { SendGridProvider } from '../providers/SendGridProvider';
 import { SesProvider } from '../providers/SesProvider';
@@ -31,6 +32,7 @@ export class MailManager {
   private providers: Map<string, MailProvider> = new Map();
   private templateEngine?: TemplateEngine;
   private queueManager?: QueueManager;
+  private failoverManager = new FailoverManager();
 
   constructor(config: MailConfig) {
     this.config = config;
@@ -285,8 +287,24 @@ export class MailManager {
       options = { ...options, html };
     }
 
-    const provider = this.getProvider();
-    return provider.send(options);
+    const mailerName = this.config.default;
+    const provider = this.getProvider(mailerName);
+    const mailerConfig = this.config.mailers[mailerName];
+    const failoverConfig = mailerConfig?.failover ?? this.config.failover;
+
+    if (!failoverConfig || failoverConfig.chain.length === 0) {
+      // No failover — backward compatible path
+      return provider.send(options);
+    }
+
+    // Delegate to FailoverManager
+    return this.failoverManager.sendWithFailover(
+      options,
+      mailerName,
+      provider,
+      failoverConfig,
+      (name: string) => this.getProvider(name),
+    );
   }
 
   /**
