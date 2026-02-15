@@ -5,12 +5,14 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
 [![Tests](https://img.shields.io/badge/tests-269%20passing-brightgreen)](https://github.com/impruthvi/nodemail)
 [![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](https://github.com/impruthvi/nodemail)
+[![Documentation](https://img.shields.io/badge/docs-nodemail.impruthvi.me-blue)](https://nodemail.impruthvi.me/)
 
 **@impruthvi/nodemail** brings the simplicity and elegance of Laravel's Mail system to the Node.js ecosystem with full TypeScript support.
 
 ## 🎯 Vision
 
 A lightweight, developer-friendly email library where you can:
+
 - Switch email providers by just changing environment variables
 - Use elegant, class-based Mailable patterns
 - Keep your package lightweight (install only what you need)
@@ -21,6 +23,7 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 ## ✨ Features
 
 ### ✅ Available Now (v1.0.0)
+
 - 🎯 **Multiple Providers** - SMTP (Nodemailer), SendGrid, AWS SES, Mailgun, Resend, Postmark
 - 🎨 **Template Engines** - Handlebars, EJS, Pug support with dynamic loading
 - 📝 **Mailable Classes** - Reusable email definitions with template support
@@ -35,6 +38,7 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 - 🛡️ **Error Handling** - Graceful degradation with helpful error messages
 
 ### 🚧 Coming Soon
+
 - 🔔 **Notifications** - Multi-channel notification system
 - 🌍 **i18n Support** - Multi-language emails
 - 🚀 **More Providers** - Mailtrap and others
@@ -47,6 +51,7 @@ npm install @impruthvi/nodemail
 ```
 
 Or install a specific version:
+
 ```bash
 npm install @impruthvi/nodemail@1.0.0
 ```
@@ -56,6 +61,7 @@ npm install @impruthvi/nodemail@1.0.0
 ### Adding Providers (Optional)
 
 **Currently Supported:**
+
 ```bash
 # SendGrid (✅ Implemented)
 npm install @sendgrid/mail
@@ -76,6 +82,7 @@ npm install postmark
 ### Adding Template Engines (Optional)
 
 **Currently Supported:**
+
 ```bash
 # Handlebars (✅ Implemented)
 npm install handlebars
@@ -120,10 +127,7 @@ Mail.configure({
 });
 
 // Send emails
-await Mail.to('user@example.com')
-  .subject('Welcome!')
-  .html('<h1>Hello World!</h1>')
-  .send();
+await Mail.to('user@example.com').subject('Welcome!').html('<h1>Hello World!</h1>').send();
 ```
 
 ### SendGrid
@@ -231,7 +235,9 @@ import { Mail } from '@impruthvi/nodemail';
 Mail.configure({
   default: 'smtp',
   from: { address: 'noreply@example.com', name: 'My App' },
-  mailers: { /* your mailer config */ },
+  mailers: {
+    /* your mailer config */
+  },
   templates: {
     engine: 'handlebars',
     viewsPath: './views/emails',
@@ -249,6 +255,7 @@ await Mail.to('user@example.com')
 ```
 
 **Template file** (`views/emails/welcome.hbs`):
+
 ```handlebars
 <h1>Welcome, {{name}}!</h1>
 <p>Thank you for joining {{appName}}.</p>
@@ -310,19 +317,21 @@ class WelcomeEmail extends MarkdownMailable {
   }
 
   build(): this {
-    return this
-      .subject(`Welcome to ${this.appName}!`)
+    return this.subject(`Welcome to ${this.appName}!`)
       .from('noreply@example.com')
-      .markdown(`# Welcome, {{name}}!
+      .markdown(
+        `# Welcome, {{name}}!
 
 Thank you for joining **{{appName}}**.
 
 [button url="https://example.com/start" color="primary"]Get Started[/button]
 
-[panel]Need help? Contact support@example.com[/panel]`, {
-        name: this.user.name,
-        appName: this.appName,
-      });
+[panel]Need help? Contact support@example.com[/panel]`,
+        {
+          name: this.user.name,
+          appName: this.appName,
+        }
+      );
   }
 }
 
@@ -332,6 +341,7 @@ await Mail.to('user@example.com').send(new WelcomeEmail(user, 'My App'));
 ### Components
 
 **Button** - Call-to-action buttons with color variants:
+
 ```markdown
 [button url="https://example.com" color="primary"]Click Here[/button]
 [button url="https://example.com" color="success"]Confirm[/button]
@@ -339,6 +349,7 @@ await Mail.to('user@example.com').send(new WelcomeEmail(user, 'My App'));
 ```
 
 **Panel** - Bordered callout sections:
+
 ```markdown
 [panel]
 **Important:** This is a highlighted notice.
@@ -346,11 +357,12 @@ await Mail.to('user@example.com').send(new WelcomeEmail(user, 'My App'));
 ```
 
 **Table** - Styled table wrapper:
+
 ```markdown
 [table]
-| Name  | Price  |
+| Name | Price |
 |-------|--------|
-| Item  | $9.99  |
+| Item | $9.99 |
 [/table]
 ```
 
@@ -359,14 +371,11 @@ await Mail.to('user@example.com').send(new WelcomeEmail(user, 'My App'));
 ```typescript
 class BrandedEmail extends MarkdownMailable {
   build(): this {
-    return this
-      .subject('Update')
-      .markdown('# News\n\nLatest updates...')
-      .theme({
-        css: 'h1 { color: #e94560; } .button-primary { background: #e94560; }',
-        headerHtml: '<img src="https://example.com/logo.png" alt="Logo">',
-        footerHtml: '<p>&copy; 2026 Company</p>',
-      });
+    return this.subject('Update').markdown('# News\n\nLatest updates...').theme({
+      css: 'h1 { color: #e94560; } .button-primary { background: #e94560; }',
+      headerHtml: '<img src="https://example.com/logo.png" alt="Logo">',
+      footerHtml: '<p>&copy; 2026 Company</p>',
+    });
   }
 }
 ```
@@ -403,10 +412,7 @@ Mail.configure({
 });
 
 // Queue immediately
-await Mail.to('user@example.com')
-  .subject('Welcome!')
-  .html('<h1>Welcome!</h1>')
-  .queue();
+await Mail.to('user@example.com').subject('Welcome!').html('<h1>Welcome!</h1>').queue();
 
 // Delayed sending (60 seconds)
 await Mail.to('user@example.com').later(60, new WelcomeEmail(user));
@@ -455,10 +461,7 @@ Mail.configure({
 });
 
 // Sends via SMTP first; if SMTP fails (after 2 retries), tries SendGrid, then SES
-await Mail.to('user@example.com')
-  .subject('Hello!')
-  .html('<h1>Hello!</h1>')
-  .send();
+await Mail.to('user@example.com').subject('Hello!').html('<h1>Hello!</h1>').send();
 ```
 
 ### Per-mailer Failover Override
@@ -475,7 +478,7 @@ Mail.configure({
       port: 587,
       auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
       failover: {
-        chain: ['postmark'],       // Only fail over to Postmark for SMTP
+        chain: ['postmark'], // Only fail over to Postmark for SMTP
         maxRetriesPerProvider: 3,
       },
     },
@@ -510,25 +513,22 @@ Mail.configure({
 After sending, the response includes failover details:
 
 ```typescript
-const result = await Mail.to('user@example.com')
-  .subject('Hello!')
-  .html('<h1>Hello!</h1>')
-  .send();
+const result = await Mail.to('user@example.com').subject('Hello!').html('<h1>Hello!</h1>').send();
 
-console.log(result.provider);          // 'sendgrid' (which provider actually sent)
-console.log(result.failoverUsed);      // true (failover was triggered)
-console.log(result.failoverAttempts);  // Array of FailoverDetail objects
+console.log(result.provider); // 'sendgrid' (which provider actually sent)
+console.log(result.failoverUsed); // true (failover was triggered)
+console.log(result.failoverAttempts); // Array of FailoverDetail objects
 ```
 
 ### FailoverConfig Reference
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `chain` | `string[]` | (required) | Ordered list of backup mailer names |
-| `maxRetriesPerProvider` | `number` | `1` | Retries per provider before moving to the next |
-| `retryDelay` | `number` | `0` | Delay (ms) between retries on the same provider |
-| `failoverDelay` | `number` | `0` | Delay (ms) before switching to the next provider |
-| `onFailover` | `(event: FailoverEvent) => void` | — | Callback fired on each failover transition |
+| Property                | Type                             | Default    | Description                                      |
+| ----------------------- | -------------------------------- | ---------- | ------------------------------------------------ |
+| `chain`                 | `string[]`                       | (required) | Ordered list of backup mailer names              |
+| `maxRetriesPerProvider` | `number`                         | `1`        | Retries per provider before moving to the next   |
+| `retryDelay`            | `number`                         | `0`        | Delay (ms) between retries on the same provider  |
+| `failoverDelay`         | `number`                         | `0`        | Delay (ms) before switching to the next provider |
+| `onFailover`            | `(event: FailoverEvent) => void` | —          | Callback fired on each failover transition       |
 
 ## 📨 Complete Fluent API
 
@@ -565,13 +565,11 @@ class WelcomeEmail extends Mailable {
   }
 
   build() {
-    return this
-      .subject(`Welcome to ${this.appName}!`)
-      .view('welcome', {
-        name: this.user.name,
-        email: this.user.email,
-        appName: this.appName,
-      });
+    return this.subject(`Welcome to ${this.appName}!`).view('welcome', {
+      name: this.user.name,
+      email: this.user.email,
+      appName: this.appName,
+    });
   }
 }
 
@@ -596,9 +594,7 @@ class WelcomeEmail extends Mailable {
   }
 
   build() {
-    return this
-      .subject(`Welcome, ${this.userName}!`)
-      .html(`<h1>Hello ${this.userName}!</h1>`);
+    return this.subject(`Welcome, ${this.userName}!`).html(`<h1>Hello ${this.userName}!</h1>`);
   }
 }
 
@@ -621,8 +617,7 @@ describe('User Registration', () => {
 
     // Assert with conditions
     Mail.assertSent(WelcomeEmail, (mail) => {
-      return mail.hasTo('user@example.com') &&
-             mail.subjectContains('Welcome');
+      return mail.hasTo('user@example.com') && mail.subjectContains('Welcome');
     });
 
     // Assert sent count
@@ -641,23 +636,23 @@ describe('User Registration', () => {
 
 ### Available Assertions
 
-| Method | Description |
-|--------|-------------|
-| `Mail.fake()` | Enable fake mode (store emails instead of sending) |
-| `Mail.restore()` | Restore real mailer |
-| `Mail.assertSent(Mailable)` | Assert mailable was sent |
-| `Mail.assertSent(Mailable, callback)` | Assert with custom conditions |
-| `Mail.assertSentCount(Mailable, count)` | Assert sent exactly N times |
-| `Mail.assertNotSent(Mailable)` | Assert mailable was NOT sent |
-| `Mail.assertNothingSent()` | Assert no emails were sent |
-| `Mail.assertQueued(Mailable)` | Assert mailable was queued |
-| `Mail.assertNothingQueued()` | Assert nothing was queued |
-| `Mail.sent()` | Get all sent messages |
-| `Mail.sent(Mailable)` | Get sent messages of specific type |
-| `Mail.hasSent()` | Check if any messages were sent |
-| `Mail.hasQueued()` | Check if any messages were queued |
-| `Mail.simulateFailures(n)` | Simulate failures for the first N sends |
-| `Mail.resetFailures()` | Clear failure simulation state |
+| Method                                  | Description                                        |
+| --------------------------------------- | -------------------------------------------------- |
+| `Mail.fake()`                           | Enable fake mode (store emails instead of sending) |
+| `Mail.restore()`                        | Restore real mailer                                |
+| `Mail.assertSent(Mailable)`             | Assert mailable was sent                           |
+| `Mail.assertSent(Mailable, callback)`   | Assert with custom conditions                      |
+| `Mail.assertSentCount(Mailable, count)` | Assert sent exactly N times                        |
+| `Mail.assertNotSent(Mailable)`          | Assert mailable was NOT sent                       |
+| `Mail.assertNothingSent()`              | Assert no emails were sent                         |
+| `Mail.assertQueued(Mailable)`           | Assert mailable was queued                         |
+| `Mail.assertNothingQueued()`            | Assert nothing was queued                          |
+| `Mail.sent()`                           | Get all sent messages                              |
+| `Mail.sent(Mailable)`                   | Get sent messages of specific type                 |
+| `Mail.hasSent()`                        | Check if any messages were sent                    |
+| `Mail.hasQueued()`                      | Check if any messages were queued                  |
+| `Mail.simulateFailures(n)`              | Simulate failures for the first N sends            |
+| `Mail.resetFailures()`                  | Clear failure simulation state                     |
 
 ### AssertableMessage Methods
 
@@ -667,43 +662,44 @@ When inspecting sent messages, you can use these helper methods:
 const sent = Mail.sent(WelcomeEmail)[0];
 
 // Check recipients
-sent.hasTo('user@example.com');      // Check TO
-sent.hasCc('cc@example.com');        // Check CC
-sent.hasBcc('bcc@example.com');      // Check BCC
+sent.hasTo('user@example.com'); // Check TO
+sent.hasCc('cc@example.com'); // Check CC
+sent.hasBcc('bcc@example.com'); // Check BCC
 
 // Check content
-sent.hasSubject('Welcome!');         // Exact subject match
-sent.subjectContains('Welcome');     // Subject contains
-sent.htmlContains('Hello');          // HTML contains
-sent.textContains('Hello');          // Plain text contains
+sent.hasSubject('Welcome!'); // Exact subject match
+sent.subjectContains('Welcome'); // Subject contains
+sent.htmlContains('Hello'); // HTML contains
+sent.textContains('Hello'); // Plain text contains
 
 // Check markdown
-sent.isMarkdown();                   // Was built from markdown
-sent.getMarkdown();                  // Get raw markdown source
-sent.markdownContains('[button');    // Markdown source contains
+sent.isMarkdown(); // Was built from markdown
+sent.getMarkdown(); // Get raw markdown source
+sent.markdownContains('[button'); // Markdown source contains
 
 // Check failover
-sent.wasFailoverUsed();              // Whether failover was triggered
-sent.getProvider();                  // Provider that actually sent
-sent.getFailoverAttempts();          // Array of FailoverDetail objects
+sent.wasFailoverUsed(); // Whether failover was triggered
+sent.getProvider(); // Provider that actually sent
+sent.getFailoverAttempts(); // Array of FailoverDetail objects
 
 // Check attachments
-sent.hasAttachments();               // Has any attachments
-sent.hasAttachment('file.pdf');      // Has specific attachment
+sent.hasAttachments(); // Has any attachments
+sent.hasAttachment('file.pdf'); // Has specific attachment
 
 // Check headers
-sent.hasHeader('X-Custom');          // Has header
+sent.hasHeader('X-Custom'); // Has header
 sent.hasHeader('X-Custom', 'value'); // Header with value
 
 // Get values
-sent.getTo();                        // Get recipients array
-sent.getSubject();                   // Get subject
-sent.getHtml();                      // Get HTML content
+sent.getTo(); // Get recipients array
+sent.getSubject(); // Get subject
+sent.getHtml(); // Get HTML content
 ```
 
 ## 🛠️ Current Status
 
 **Phase 1: Project Setup** ✅ Complete
+
 - TypeScript 5.6 configuration
 - ESLint 9 (flat config)
 - Modern tooling setup
@@ -712,6 +708,7 @@ sent.getHtml();                      // Get HTML content
 - Lightweight architecture (peerDependencies)
 
 **Phase 2: Core Implementation** ✅ Complete
+
 - ✅ Mail Manager & Facade
 - ✅ SMTP Provider (nodemailer)
 - ✅ SendGrid Provider (@sendgrid/mail)
@@ -721,6 +718,7 @@ sent.getHtml();                      // Get HTML content
 - ✅ Error handling & graceful degradation
 
 **Phase 3: Additional Providers** ✅ Complete
+
 - ✅ Mailgun Provider (mailgun.js)
 - ✅ Resend Provider (resend)
 - ✅ Postmark Provider (postmark)
@@ -728,24 +726,28 @@ sent.getHtml();                      // Get HTML content
 - ✅ Comprehensive provider tests
 
 **Phase 4: Template Engines & Mailable** ✅ Complete
+
 - ✅ Template engines (Handlebars, EJS, Pug)
 - ✅ Laravel-like Mailable classes with template support
 - ✅ Complete fluent API (cc, bcc, replyTo, attachments, headers)
 - ✅ Dynamic template loading with caching
 
 **Phase 5: Testing Utilities** ✅ Complete (v0.5.0)
+
 - ✅ Mail::fake() for testing
 - ✅ assertSent(), assertNotSent(), assertNothingSent()
 - ✅ assertQueued(), assertNothingQueued()
 - ✅ AssertableMessage with inspection methods
 
 **Phase 6: Queue Management** ✅ Complete (v0.6.0)
+
 - ✅ QueueManager with Bull and BullMQ drivers
 - ✅ Immediate, delayed, and scheduled sending
 - ✅ Automatic retries with configurable backoff
 - ✅ MailFake queue assertion support
 
 **Phase 7: Markdown Mail** ✅ Complete (v0.7.0)
+
 - ✅ MarkdownMailable base class
 - ✅ MarkdownRenderer with CSS inlining
 - ✅ Components: button, panel, table
@@ -754,6 +756,7 @@ sent.getHtml();                      // Get HTML content
 - ✅ AssertableMessage markdown assertions
 
 **Phase 8: Provider Failover** ✅ Complete (v1.0.0)
+
 - ✅ FailoverManager with automatic provider chain
 - ✅ Configurable retries per provider (`maxRetriesPerProvider`)
 - ✅ Retry and failover delays (`retryDelay`, `failoverDelay`)
@@ -764,6 +767,7 @@ sent.getHtml();                      // Get HTML content
 - ✅ 269 passing tests
 
 **Phase 9+** 🚧 Coming Soon
+
 - 🔔 Notifications - Multi-channel notification system
 - 🌍 i18n Support - Multi-language emails
 - 🎨 Enhanced CLI - Command-line tools
@@ -820,6 +824,7 @@ await Mail.to(user.email).send(new WelcomeEmail(user));
 ### Lightweight by Design
 
 Unlike other packages that bundle everything:
+
 - **Base package**: ~25MB (SMTP only)
 - **Add providers as needed**: `npm install @sendgrid/mail`
 - **No bloat**: Only install what you use
@@ -842,6 +847,7 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail) - bringing el
 
 ## 📞 Support & Community
 
+- 📚 [Documentation](https://nodemail.impruthvi.me/) - Complete guides and API reference
 - 📫 [GitHub Issues](https://github.com/impruthvi/nodemail/issues) - Bug reports and feature requests
 - 💬 [GitHub Discussions](https://github.com/impruthvi/nodemail/discussions) - Questions and community chat
 
