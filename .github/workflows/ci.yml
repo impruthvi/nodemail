@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run tests with coverage
+        run: npm test -- --coverage --coverageReporters=json-summary --coverageReporters=text
+
+      - name: Generate stats.json
+        run: |
+          # Run tests again with JSON output to get test count
+          npm test -- --json --outputFile=test-results.json 2>/dev/null || true
+
+          # Extract test count
+          if [ -f test-results.json ]; then
+            TESTS=$(jq '.numPassedTests // 0' test-results.json)
+          else
+            TESTS=0
+          fi
+
+          # Extract coverage from coverage-summary.json
+          if [ -f coverage/coverage-summary.json ]; then
+            COVERAGE=$(jq '.total.lines.pct // 0' coverage/coverage-summary.json | cut -d. -f1)
+          else
+            COVERAGE=0
+          fi
+
+          # Create stats.json
+          mkdir -p public
+          cat > public/stats.json << EOF
+          {
+            "tests": $TESTS,
+            "coverage": $COVERAGE,
+            "providers": 6,
+            "updatedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+          echo "Generated stats.json:"
+          cat public/stats.json
+
+      - name: Upload stats artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stats
+          path: public/stats.json
+
+  # Publish stats to GitHub Pages (only on main branch push)
+  publish-stats:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Download stats artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: stats
+          path: ./public
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Trigger docs site rebuild (optional - requires DOCS_DISPATCH_TOKEN secret)
+  trigger-docs-rebuild:
+    needs: publish-stats
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Trigger nodemail-doc rebuild
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.DOCS_DISPATCH_TOKEN }}" \
+            https://api.github.com/repos/impruthvi/nodemail-doc/dispatches \
+            -d '{"event_type":"stats-updated"}'
+        continue-on-error: true
