@@ -71,20 +71,11 @@ jobs:
           name: stats
           path: public/stats.json
 
-  # Publish stats to GitHub Pages (only on main branch push)
-  publish-stats:
+  # Push stats.json directly to nodemail-docs repo
+  push-stats-to-docs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Download stats artifact
@@ -93,21 +84,36 @@ jobs:
           name: stats
           path: ./public
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+      - name: Push stats.json to nodemail-docs repo
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_DISPATCH_TOKEN }}
+        run: |
+          CONTENT=$(base64 -w 0 ./public/stats.json)
 
-      - name: Upload to GitHub Pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./public
+          # Get current file SHA (needed for updates)
+          SHA=$(curl -s \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/impruthvi/nodemail-docs/contents/lib/stats.json \
+            | jq -r '.sha // empty')
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          if [ -n "$SHA" ]; then
+            PAYLOAD=$(jq -n --arg content "$CONTENT" --arg sha "$SHA" \
+              '{message: "chore: update stats.json from CI", content: $content, sha: $sha}')
+          else
+            PAYLOAD=$(jq -n --arg content "$CONTENT" \
+              '{message: "chore: add stats.json from CI", content: $content}')
+          fi
+
+          curl -X PUT \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/impruthvi/nodemail-docs/contents/lib/stats.json \
+            -d "$PAYLOAD"
 
   # Trigger docs site rebuild (optional - requires DOCS_DISPATCH_TOKEN secret)
   trigger-docs-rebuild:
-    needs: publish-stats
+    needs: push-stats-to-docs
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
