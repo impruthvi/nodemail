@@ -30,6 +30,7 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 - 📋 **Markdown Mail** - Write emails in Markdown with components (button, panel, table)
 - 📦 **Queue Support** - Background email sending with Bull/BullMQ
 - 🔄 **Provider Failover** - Automatic failover chain with retries, delays, and callbacks
+- 🔔 **Email Events** - `sending`, `sent`, `failed` lifecycle hooks for logging, analytics, and cancellation
 - 🧪 **Testing Utilities** - Mail::fake() for testing (Laravel-style assertions)
 - 🪶 **Lightweight** - Only ~25MB with SMTP, install additional providers as needed
 - 🔒 **Type-Safe** - Full TypeScript support with strict typing
@@ -529,6 +530,48 @@ console.log(result.failoverAttempts); // Array of FailoverDetail objects
 | `retryDelay`            | `number`                         | `0`        | Delay (ms) between retries on the same provider  |
 | `failoverDelay`         | `number`                         | `0`        | Delay (ms) before switching to the next provider |
 | `onFailover`            | `(event: FailoverEvent) => void` | —          | Callback fired on each failover transition       |
+
+## 🔔 Email Events
+
+Hook into the email lifecycle for logging, analytics, or to modify/cancel emails before sending.
+
+```typescript
+// Log all outgoing emails
+Mail.onSending((event) => {
+  console.log(`Sending to ${event.options.to} via ${event.mailer}`);
+  // Modify options before send
+  event.options.headers = { ...event.options.headers, 'X-Tracking': '123' };
+});
+
+// Log successful deliveries
+Mail.onSent((event) => {
+  console.log(`Sent! ID: ${event.response.messageId}`);
+});
+
+// Log failures
+Mail.onFailed((event) => {
+  console.error(`Failed: ${event.error}`);
+});
+
+// Cancel a send by returning false
+Mail.onSending((event) => {
+  if (event.options.to === 'blocked@example.com') return false;
+});
+
+// Remove all listeners
+Mail.clearListeners();
+```
+
+### Event Methods
+
+| Method | Description |
+| --- | --- |
+| `Mail.onSending(listener)` | Register listener before send (can cancel with `return false`, can mutate `event.options`) |
+| `Mail.onSent(listener)` | Register listener after successful send |
+| `Mail.onFailed(listener)` | Register listener on send failure |
+| `Mail.clearListeners()` | Remove all event listeners |
+
+Events work in both real and fake mode. Listener errors are silently caught and never break email delivery. See [docs/email-events.md](docs/email-events.md) for the full guide.
 
 ## 📨 Complete Fluent API
 

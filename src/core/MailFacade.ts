@@ -6,7 +6,15 @@
 
 import * as path from 'path';
 import { MailManager } from './MailManager';
-import type { MailConfig, MailOptions, MailResponse, QueueJobResult } from '../types';
+import type {
+  MailConfig,
+  MailOptions,
+  MailResponse,
+  QueueJobResult,
+  SendingListener,
+  SentListener,
+  SendFailedListener,
+} from '../types';
 import type { Mailable } from './Mailable';
 import { MailFake } from '../testing/MailFake';
 import type { AssertableMessage } from '../testing/AssertableMessage';
@@ -120,6 +128,40 @@ class MailFacade {
       return;
     }
     return this.getInstance().processQueue(queueName);
+  }
+
+  // ==================== Event Methods ====================
+
+  static onSending(listener: SendingListener): void {
+    if (this.isFaking()) {
+      this.fakeInstance!.onSending(listener);
+    } else {
+      this.getInstance().onSending(listener);
+    }
+  }
+
+  static onSent(listener: SentListener): void {
+    if (this.isFaking()) {
+      this.fakeInstance!.onSent(listener);
+    } else {
+      this.getInstance().onSent(listener);
+    }
+  }
+
+  static onFailed(listener: SendFailedListener): void {
+    if (this.isFaking()) {
+      this.fakeInstance!.onFailed(listener);
+    } else {
+      this.getInstance().onFailed(listener);
+    }
+  }
+
+  static clearListeners(): void {
+    if (this.isFaking()) {
+      this.fakeInstance!.clearListeners();
+    } else {
+      this.getInstance().clearListeners();
+    }
   }
 
   // ==================== Testing Methods ====================

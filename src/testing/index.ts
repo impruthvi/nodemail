@@ -4,5 +4,5 @@
  */
 
 export { MailFake } from './MailFake';
-export type { SentMessage } from './MailFake';
+export type { SentMessage, FiredEvent } from './MailFake';
 export { AssertableMessage } from './AssertableMessage';

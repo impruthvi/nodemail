@@ -160,6 +160,32 @@ export interface FailoverDetail {
   durationMs: number;
 }
 
+// ==================== Mail Event Types ====================
+
+export interface SendingEvent {
+  options: MailOptions;
+  mailer: string;
+  timestamp: string;
+}
+
+export interface SentEvent {
+  options: MailOptions;
+  response: MailResponse;
+  mailer: string;
+  timestamp: string;
+}
+
+export interface SendFailedEvent {
+  options: MailOptions;
+  error: Error | string;
+  mailer: string;
+  timestamp: string;
+}
+
+export type SendingListener = (event: SendingEvent) => boolean | void | Promise<boolean | void>;
+export type SentListener = (event: SentEvent) => void | Promise<void>;
+export type SendFailedListener = (event: SendFailedEvent) => void | Promise<void>;
+
 // ==================== Queue Types ====================
 
 export interface QueueConfig {

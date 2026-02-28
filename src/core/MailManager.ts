@@ -12,6 +12,12 @@ import type {
   MailerConfig,
   Attachment,
   QueueJobResult,
+  SendingEvent,
+  SentEvent,
+  SendFailedEvent,
+  SendingListener,
+  SentListener,
+  SendFailedListener,
 } from '../types';
 import { FailoverManager } from './FailoverManager';
 import { SmtpProvider } from '../providers/SmtpProvider';
@@ -34,6 +40,11 @@ export class MailManager {
   private templateEngine?: TemplateEngine;
   private queueManager?: QueueManager;
   private failoverManager = new FailoverManager();
+  private listeners = {
+    sending: [] as SendingListener[],
+    sent: [] as SentListener[],
+    failed: [] as SendFailedListener[],
+  };
 
   constructor(config: MailConfig) {
     this.config = config;
@@ -300,23 +311,67 @@ export class MailManager {
     }
 
     const mailerName = this.config.default;
+
+    // Fire sending event (supports cancellation and mutation)
+    const sendingEvent: SendingEvent = {
+      options,
+      mailer: mailerName,
+      timestamp: new Date().toISOString(),
+    };
+
+    const shouldSend = await this.fireSending(sendingEvent);
+    if (!shouldSend) {
+      return { success: false, error: 'Send cancelled by sending listener' };
+    }
+
+    // Use potentially mutated options
+    options = sendingEvent.options;
+
     const provider = this.getProvider(mailerName);
     const mailerConfig = this.config.mailers[mailerName];
     const failoverConfig = mailerConfig?.failover ?? this.config.failover;
 
-    if (!failoverConfig || failoverConfig.chain.length === 0) {
-      // No failover — backward compatible path
-      return provider.send(options);
+    let response: MailResponse;
+
+    try {
+      if (!failoverConfig || failoverConfig.chain.length === 0) {
+        response = await provider.send(options);
+      } else {
+        response = await this.failoverManager.sendWithFailover(
+          options,
+          mailerName,
+          provider,
+          failoverConfig,
+          (name: string) => this.getProvider(name),
+        );
+      }
+    } catch (error) {
+      await this.fireFailed({
+        options,
+        error: error instanceof Error ? error : String(error),
+        mailer: mailerName,
+        timestamp: new Date().toISOString(),
+      });
+      throw error;
     }
 
-    // Delegate to FailoverManager
-    return this.failoverManager.sendWithFailover(
-      options,
-      mailerName,
-      provider,
-      failoverConfig,
-      (name: string) => this.getProvider(name),
-    );
+    if (response.success) {
+      await this.fireSent({
+        options,
+        response,
+        mailer: mailerName,
+        timestamp: new Date().toISOString(),
+      });
+    } else {
+      await this.fireFailed({
+        options,
+        error: response.error || 'Send failed',
+        mailer: mailerName,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    return response;
   }
 
   /**
@@ -324,6 +379,58 @@ export class MailManager {
    */
   getDefaultMailer(): string {
     return this.config.default;
+  }
+
+  // ==================== Event Methods ====================
+
+  onSending(listener: SendingListener): void {
+    this.listeners.sending.push(listener);
+  }
+
+  onSent(listener: SentListener): void {
+    this.listeners.sent.push(listener);
+  }
+
+  onFailed(listener: SendFailedListener): void {
+    this.listeners.failed.push(listener);
+  }
+
+  clearListeners(): void {
+    this.listeners.sending = [];
+    this.listeners.sent = [];
+    this.listeners.failed = [];
+  }
+
+  private async fireSending(event: SendingEvent): Promise<boolean> {
+    for (const listener of this.listeners.sending) {
+      try {
+        const result = await listener(event);
+        if (result === false) return false;
+      } catch {
+        // Listener errors must never break email delivery
+      }
+    }
+    return true;
+  }
+
+  private async fireSent(event: SentEvent): Promise<void> {
+    for (const listener of this.listeners.sent) {
+      try {
+        await listener(event);
+      } catch {
+        // Listener errors must never break email delivery
+      }
+    }
+  }
+
+  private async fireFailed(event: SendFailedEvent): Promise<void> {
+    for (const listener of this.listeners.failed) {
+      try {
+        await listener(event);
+      } catch {
+        // Listener errors must never break email delivery
+      }
+    }
   }
 }
 

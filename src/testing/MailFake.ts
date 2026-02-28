@@ -4,7 +4,18 @@
  * Provides assertion methods for verifying email behavior
  */
 
-import type { MailOptions, MailResponse, MailProvider, MailConfig } from '../types';
+import type {
+  MailOptions,
+  MailResponse,
+  MailProvider,
+  MailConfig,
+  SendingEvent,
+  SentEvent,
+  SendFailedEvent,
+  SendingListener,
+  SentListener,
+  SendFailedListener,
+} from '../types';
 import type { Mailable } from '../core/Mailable';
 import { AssertableMessage } from './AssertableMessage';
 
@@ -14,11 +25,22 @@ export interface SentMessage {
   timestamp: Date;
 }
 
+export type FiredEvent =
+  | { type: 'sending'; event: SendingEvent }
+  | { type: 'sent'; event: SentEvent }
+  | { type: 'failed'; event: SendFailedEvent };
+
 export class MailFake implements MailProvider {
   private sentMessages: SentMessage[] = [];
   private queuedMessages: SentMessage[] = [];
   private failureCount = 0;
   private failuresSent = 0;
+  private firedEvents: FiredEvent[] = [];
+  private listeners = {
+    sending: [] as SendingListener[],
+    sent: [] as SentListener[],
+    failed: [] as SendFailedListener[],
+  };
 
   constructor(_config?: MailConfig) {
     // Config stored for future use (queue configuration, etc.)
@@ -43,15 +65,40 @@ export class MailFake implements MailProvider {
   /**
    * Fake send - stores message instead of sending
    * Respects simulateFailures() for testing failover scenarios
+   * Fires sending/sent/failed events
    */
-  send(options: MailOptions, mailable?: Mailable): Promise<MailResponse> {
+  async send(options: MailOptions, mailable?: Mailable): Promise<MailResponse> {
+    const mailerName = 'fake';
+
+    // Fire sending event
+    const sendingEvent: SendingEvent = {
+      options,
+      mailer: mailerName,
+      timestamp: new Date().toISOString(),
+    };
+
+    const shouldSend = await this.fireSending(sendingEvent);
+    if (!shouldSend) {
+      return { success: false, error: 'Send cancelled by sending listener' };
+    }
+
+    // Use potentially mutated options
+    options = sendingEvent.options;
+
     // Check if we should simulate a failure
     if (this.failureCount > 0 && this.failuresSent < this.failureCount) {
       this.failuresSent++;
-      return Promise.resolve({
+      const response: MailResponse = {
         success: false,
         error: `Simulated failure (${this.failuresSent}/${this.failureCount})`,
+      };
+      await this.fireFailed({
+        options,
+        error: response.error!,
+        mailer: mailerName,
+        timestamp: new Date().toISOString(),
       });
+      return response;
     }
 
     const message: SentMessage = {
@@ -62,13 +109,22 @@ export class MailFake implements MailProvider {
 
     this.sentMessages.push(message);
 
-    return Promise.resolve({
+    const response: MailResponse = {
       success: true,
       messageId: `fake-${Date.now()}-${this.sentMessages.length}`,
       accepted: this.normalizeRecipients(options.to),
       rejected: [],
       response: 'Message stored in fake mailer',
+    };
+
+    await this.fireSent({
+      options,
+      response,
+      mailer: mailerName,
+      timestamp: new Date().toISOString(),
     });
+
+    return response;
   }
 
   /**
@@ -316,13 +372,76 @@ export class MailFake implements MailProvider {
   }
 
   /**
-   * Clear all sent and queued messages
+   * Clear all sent and queued messages, events, and listeners
    */
   clear(): void {
     this.sentMessages = [];
     this.queuedMessages = [];
     this.failureCount = 0;
     this.failuresSent = 0;
+    this.firedEvents = [];
+    this.listeners.sending = [];
+    this.listeners.sent = [];
+    this.listeners.failed = [];
+  }
+
+  // ==================== Event Methods ====================
+
+  onSending(listener: SendingListener): void {
+    this.listeners.sending.push(listener);
+  }
+
+  onSent(listener: SentListener): void {
+    this.listeners.sent.push(listener);
+  }
+
+  onFailed(listener: SendFailedListener): void {
+    this.listeners.failed.push(listener);
+  }
+
+  clearListeners(): void {
+    this.listeners.sending = [];
+    this.listeners.sent = [];
+    this.listeners.failed = [];
+  }
+
+  getFiredEvents(): FiredEvent[] {
+    return [...this.firedEvents];
+  }
+
+  private async fireSending(event: SendingEvent): Promise<boolean> {
+    this.firedEvents.push({ type: 'sending', event });
+    for (const listener of this.listeners.sending) {
+      try {
+        const result = await listener(event);
+        if (result === false) return false;
+      } catch {
+        // Listener errors must never break email delivery
+      }
+    }
+    return true;
+  }
+
+  private async fireSent(event: SentEvent): Promise<void> {
+    this.firedEvents.push({ type: 'sent', event });
+    for (const listener of this.listeners.sent) {
+      try {
+        await listener(event);
+      } catch {
+        // Listener errors must never break email delivery
+      }
+    }
+  }
+
+  private async fireFailed(event: SendFailedEvent): Promise<void> {
+    this.firedEvents.push({ type: 'failed', event });
+    for (const listener of this.listeners.failed) {
+      try {
+        await listener(event);
+      } catch {
+        // Listener errors must never break email delivery
+      }
+    }
   }
 
   /**
