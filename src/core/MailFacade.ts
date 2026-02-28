@@ -4,6 +4,7 @@
  * Supports Mail.fake() for testing
  */
 
+import * as path from 'path';
 import { MailManager } from './MailManager';
 import type { MailConfig, MailOptions, MailResponse, QueueJobResult } from '../types';
 import type { Mailable } from './Mailable';
@@ -295,6 +296,17 @@ class MailFacade {
 class FakeableMessageBuilder {
   public options: Partial<MailOptions> = {};
 
+  private static readonly MIME_TYPES: Record<string, string> = {
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    gif: 'image/gif',
+    svg: 'image/svg+xml',
+    webp: 'image/webp',
+    bmp: 'image/bmp',
+    ico: 'image/x-icon',
+  };
+
   constructor(
     private manager: MailManager | MailFake,
     to: string | string[]
@@ -354,6 +366,33 @@ class FakeableMessageBuilder {
 
   data(data: Record<string, unknown>): this {
     this.options.data = data;
+    return this;
+  }
+
+  embedImage(filePath: string, cid: string, filename?: string): this {
+    if (!this.options.attachments) {
+      this.options.attachments = [];
+    }
+    const ext = path.extname(filePath).slice(1).toLowerCase();
+    this.options.attachments.push({
+      filename: filename || path.basename(filePath),
+      path: filePath,
+      cid,
+      contentType: FakeableMessageBuilder.MIME_TYPES[ext] || 'application/octet-stream',
+    });
+    return this;
+  }
+
+  embedImageData(content: Buffer | string, cid: string, contentType: string, filename?: string): this {
+    if (!this.options.attachments) {
+      this.options.attachments = [];
+    }
+    this.options.attachments.push({
+      filename: filename || `${cid}.${contentType.split('/')[1] || 'bin'}`,
+      content,
+      cid,
+      contentType,
+    });
     return this;
   }
 

@@ -287,6 +287,31 @@ export class AssertableMessage {
     return this.response;
   }
 
+  // ==================== Embedded Images ====================
+
+  /**
+   * Check if the message has an embedded image with the given CID
+   */
+  hasEmbeddedImage(cid: string): boolean {
+    if (!this.options.attachments) return false;
+    return this.options.attachments.some((a) => a.cid === cid);
+  }
+
+  /**
+   * Get all embedded image attachments (those with a CID)
+   */
+  getEmbeddedImages(): Attachment[] {
+    if (!this.options.attachments) return [];
+    return this.options.attachments.filter((a) => !!a.cid);
+  }
+
+  /**
+   * Get the number of embedded images
+   */
+  embeddedImageCount(): number {
+    return this.getEmbeddedImages().length;
+  }
+
   // ==================== Markdown ====================
 
   /**

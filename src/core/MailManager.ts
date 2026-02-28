@@ -3,6 +3,7 @@
  * Manages multiple mail configurations (SMTP, SendGrid, etc.)
  */
 
+import * as path from 'path';
 import type {
   MailConfig,
   MailOptions,
@@ -321,6 +322,17 @@ export class MailManager {
 export class MessageBuilder {
   public options: Partial<MailOptions> = {};
 
+  private static readonly MIME_TYPES: Record<string, string> = {
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    gif: 'image/gif',
+    svg: 'image/svg+xml',
+    webp: 'image/webp',
+    bmp: 'image/bmp',
+    ico: 'image/x-icon',
+  };
+
   constructor(
     private manager: MailManager,
     to: string | string[]
@@ -380,6 +392,33 @@ export class MessageBuilder {
 
   data(data: Record<string, unknown>) {
     this.options.data = data;
+    return this;
+  }
+
+  embedImage(filePath: string, cid: string, filename?: string) {
+    if (!this.options.attachments) {
+      this.options.attachments = [];
+    }
+    const ext = path.extname(filePath).slice(1).toLowerCase();
+    this.options.attachments.push({
+      filename: filename || path.basename(filePath),
+      path: filePath,
+      cid,
+      contentType: MessageBuilder.MIME_TYPES[ext] || 'application/octet-stream',
+    });
+    return this;
+  }
+
+  embedImageData(content: Buffer | string, cid: string, contentType: string, filename?: string) {
+    if (!this.options.attachments) {
+      this.options.attachments = [];
+    }
+    this.options.attachments.push({
+      filename: filename || `${cid}.${contentType.split('/')[1] || 'bin'}`,
+      content,
+      cid,
+      contentType,
+    });
     return this;
   }
 
