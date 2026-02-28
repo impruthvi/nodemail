@@ -189,15 +189,15 @@ export type SendFailedListener = (event: SendFailedEvent) => void | Promise<void
 // ==================== Preview Types ====================
 
 export interface PreviewResult {
-  html?: string;
-  text?: string;
-  subject?: string;
-  from?: string | MailAddress | MailAddress[];
+  html?: string | undefined;
+  text?: string | undefined;
+  subject?: string | undefined;
+  from?: string | MailAddress | MailAddress[] | undefined;
   to: string | string[] | MailAddress | MailAddress[];
-  cc?: string | string[] | MailAddress | MailAddress[];
-  bcc?: string | string[] | MailAddress | MailAddress[];
-  headers?: Record<string, string>;
-  attachments?: Attachment[];
+  cc?: string | string[] | MailAddress | MailAddress[] | undefined;
+  bcc?: string | string[] | MailAddress | MailAddress[] | undefined;
+  headers?: Record<string, string> | undefined;
+  attachments?: Attachment[] | undefined;
 }
 
 // ==================== Queue Types ====================
