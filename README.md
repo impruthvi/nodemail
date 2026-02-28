@@ -22,7 +22,7 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 
 ## ✨ Features
 
-### ✅ Available Now (v1.0.0)
+### ✅ Available Now (v1.0.1)
 
 - 🎯 **Multiple Providers** - SMTP (Nodemailer), SendGrid, AWS SES, Mailgun, Resend, Postmark
 - 🎨 **Template Engines** - Handlebars, EJS, Pug support with dynamic loading
@@ -56,7 +56,7 @@ npm install @impruthvi/nodemail
 Or install a specific version:
 
 ```bash
-npm install @impruthvi/nodemail@1.0.0
+npm install @impruthvi/nodemail@1.0.1
 ```
 
 **Lightweight by default!** Only includes SMTP support (~25MB).
@@ -886,6 +886,15 @@ sent.getHtml(); // Get HTML content
 - ✅ MailFake `simulateFailures()` / `resetFailures()` for testing
 - ✅ Response metadata: `provider`, `failoverUsed`, `failoverAttempts`
 - ✅ 269 passing tests
+
+**Post v1.0.0: Incremental Features** ✅ Complete (v1.0.1)
+
+- ✅ Embedded Images (CID support) for inline images in HTML
+- ✅ Email Priority Levels (`high`, `normal`, `low`) with X-Priority headers
+- ✅ Email Events System (`sending`, `sent`, `failed` lifecycle hooks)
+- ✅ Email Preview — render emails without sending (debug templates, verify headers)
+- ✅ Rate Limiting — per-provider sliding window algorithm
+- ✅ 522 passing tests
 
 **Phase 9+** 🚧 Coming Soon
 

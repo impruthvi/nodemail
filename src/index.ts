@@ -37,4 +37,4 @@ export type { SentMessage } from './testing';
 export * from './types';
 
 // Version
-export const VERSION = '1.0.0';
+export const VERSION = '1.0.1';
