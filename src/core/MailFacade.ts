@@ -396,6 +396,11 @@ class FakeableMessageBuilder {
     return this;
   }
 
+  priority(level: 'high' | 'normal' | 'low'): this {
+    this.options.priority = level;
+    return this;
+  }
+
   async send(mailable?: Mailable): Promise<MailResponse> {
     // If using MailFake
     if (this.manager instanceof MailFake) {

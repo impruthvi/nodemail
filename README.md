@@ -545,6 +545,7 @@ await Mail.to('user@example.com')
     { filename: 'report.pdf', path: './files/report.pdf' },
     { filename: 'image.png', content: buffer },
   ])
+  .priority('high')
   .headers({ 'X-Custom-Header': 'value' })
   .send();
 ```
@@ -685,6 +686,10 @@ sent.getFailoverAttempts(); // Array of FailoverDetail objects
 // Check attachments
 sent.hasAttachments(); // Has any attachments
 sent.hasAttachment('file.pdf'); // Has specific attachment
+
+// Check priority
+sent.hasPriority('high'); // Has specific priority
+sent.getPriority(); // Get priority level
 
 // Check headers
 sent.hasHeader('X-Custom'); // Has header

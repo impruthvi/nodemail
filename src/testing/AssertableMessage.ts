@@ -312,6 +312,22 @@ export class AssertableMessage {
     return this.getEmbeddedImages().length;
   }
 
+  // ==================== Priority ====================
+
+  /**
+   * Check if the message has a specific priority level
+   */
+  hasPriority(level: 'high' | 'normal' | 'low'): boolean {
+    return this.options.priority === level;
+  }
+
+  /**
+   * Get the priority level
+   */
+  getPriority(): 'high' | 'normal' | 'low' | undefined {
+    return this.options.priority;
+  }
+
   // ==================== Markdown ====================
 
   /**

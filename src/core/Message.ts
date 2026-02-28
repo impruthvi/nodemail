@@ -106,6 +106,14 @@ export class Message {
   }
 
   /**
+   * Set the email priority level
+   */
+  priority(level: 'high' | 'normal' | 'low'): this {
+    this.options.priority = level;
+    return this;
+  }
+
+  /**
    * Set template and data
    */
   template(name: string, data: Record<string, unknown>): this {

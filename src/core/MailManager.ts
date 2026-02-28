@@ -279,6 +279,17 @@ export class MailManager {
       }
     }
 
+    // Convert priority to headers
+    if (options.priority) {
+      const map = {
+        high:   { 'X-Priority': '1', 'X-MSMail-Priority': 'High',   'Importance': 'high' },
+        normal: { 'X-Priority': '3', 'X-MSMail-Priority': 'Normal', 'Importance': 'normal' },
+        low:    { 'X-Priority': '5', 'X-MSMail-Priority': 'Low',    'Importance': 'low' },
+      };
+      const existing = options.headers || {};
+      options = { ...options, headers: { ...map[options.priority], ...existing } };
+    }
+
     // Render template if specified
     if (options.template && this.templateEngine) {
       const html = await this.templateEngine.renderFile(
@@ -419,6 +430,11 @@ export class MessageBuilder {
       cid,
       contentType,
     });
+    return this;
+  }
+
+  priority(level: 'high' | 'normal' | 'low') {
+    this.options.priority = level;
     return this;
   }
 

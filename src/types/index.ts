@@ -116,6 +116,7 @@ export interface MailOptions {
   headers?: Record<string, string>;
   template?: string;
   data?: Record<string, unknown>;
+  priority?: 'high' | 'normal' | 'low';
 }
 
 export interface MailProvider {

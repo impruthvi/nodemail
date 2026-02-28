@@ -178,6 +178,14 @@ export abstract class Mailable {
   }
 
   /**
+   * Set the email priority level
+   */
+  protected priority(level: 'high' | 'normal' | 'low'): this {
+    this.options.priority = level;
+    return this;
+  }
+
+  /**
    * Set custom headers
    */
   protected withHeaders(headers: Record<string, string>): this {
