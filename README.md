@@ -32,6 +32,7 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 - 🔄 **Provider Failover** - Automatic failover chain with retries, delays, and callbacks
 - 🔔 **Email Events** - `sending`, `sent`, `failed` lifecycle hooks for logging, analytics, and cancellation
 - 🔍 **Email Preview** - Preview rendered emails without sending (debug templates, verify headers)
+- ⏱️ **Rate Limiting** - Per-provider rate limiting with sliding window algorithm
 - 🧪 **Testing Utilities** - Mail::fake() for testing (Laravel-style assertions)
 - 🪶 **Lightweight** - Only ~25MB with SMTP, install additional providers as needed
 - 🔒 **Type-Safe** - Full TypeScript support with strict typing
@@ -594,6 +595,56 @@ const preview = await Mail.preview(new WelcomeMail().to('user@example.com'));
 ```
 
 Preview applies full preprocessing (markdown, templates, priority headers) but fires no events and stores no messages. Works in both real and fake mode. See [docs/email-preview.md](docs/email-preview.md) for the full guide.
+
+## ⏱️ Rate Limiting
+
+Per-provider rate limiting to prevent exceeding email provider API limits. Uses an in-memory sliding window algorithm.
+
+```typescript
+// Global rate limit (applies to all mailers)
+Mail.configure({
+  default: 'smtp',
+  from: { address: 'noreply@example.com', name: 'App' },
+  mailers: {
+    smtp: { driver: 'smtp', host: 'localhost', port: 587 },
+  },
+  rateLimit: { maxPerWindow: 100, windowMs: 60000 },
+});
+
+// Per-mailer override (takes precedence over global)
+Mail.configure({
+  default: 'smtp',
+  from: { address: 'noreply@example.com', name: 'App' },
+  mailers: {
+    smtp: {
+      driver: 'smtp', host: 'localhost', port: 587,
+      rateLimit: { maxPerWindow: 10, windowMs: 1000 },
+    },
+    sendgrid: {
+      driver: 'sendgrid', apiKey: '...',
+      rateLimit: { maxPerWindow: 100, windowMs: 1000 },
+    },
+  },
+});
+
+// When exceeded — returns { success: false }, no throw
+const result = await Mail.to('user@example.com')
+  .subject('Hi').html('<p>Hi</p>').send();
+// result = { success: false, error: 'Rate limit exceeded for mailer "smtp". Try again in 450ms.' }
+
+// Optional callback
+Mail.configure({
+  rateLimit: {
+    maxPerWindow: 10,
+    windowMs: 1000,
+    onRateLimited: (event) => {
+      console.log(`Rate limited on ${event.mailer}, retry in ${event.retryAfterMs}ms`);
+    },
+  },
+});
+```
+
+Rate-limited sends don't fire `sending`/`sent`/`failed` events. See [docs/rate-limiting.md](docs/rate-limiting.md) for the full guide.
 
 ## 📨 Complete Fluent API
 

@@ -21,6 +21,7 @@ import type {
   SendFailedListener,
 } from '../types';
 import { FailoverManager } from './FailoverManager';
+import { RateLimiter } from './RateLimiter';
 import { SmtpProvider } from '../providers/SmtpProvider';
 import { SendGridProvider } from '../providers/SendGridProvider';
 import { SesProvider } from '../providers/SesProvider';
@@ -41,6 +42,7 @@ export class MailManager {
   private templateEngine?: TemplateEngine;
   private queueManager?: QueueManager;
   private failoverManager = new FailoverManager();
+  private rateLimiter = new RateLimiter();
   private listeners = {
     sending: [] as SendingListener[],
     sent: [] as SentListener[],
@@ -346,6 +348,32 @@ export class MailManager {
 
     const mailerName = this.config.default;
 
+    // Rate limit check (before events — rate-limited sends don't fire events)
+    const mailerConfig = this.config.mailers[mailerName];
+    const rateLimitConfig = mailerConfig?.rateLimit ?? this.config.rateLimit;
+
+    if (rateLimitConfig) {
+      const check = this.rateLimiter.check(mailerName, rateLimitConfig);
+      if (!check.allowed) {
+        if (rateLimitConfig.onRateLimited) {
+          try {
+            rateLimitConfig.onRateLimited({
+              mailer: mailerName,
+              retryAfterMs: check.retryAfterMs,
+              options,
+              timestamp: new Date().toISOString(),
+            });
+          } catch {
+            /* callback errors never break sending */
+          }
+        }
+        return {
+          success: false,
+          error: `Rate limit exceeded for mailer "${mailerName}". Try again in ${check.retryAfterMs}ms.`,
+        };
+      }
+    }
+
     // Fire sending event (supports cancellation and mutation)
     const sendingEvent: SendingEvent = {
       options,
@@ -362,7 +390,6 @@ export class MailManager {
     options = sendingEvent.options;
 
     const provider = this.getProvider(mailerName);
-    const mailerConfig = this.config.mailers[mailerName];
     const failoverConfig = mailerConfig?.failover ?? this.config.failover;
 
     let response: MailResponse;
@@ -413,6 +440,13 @@ export class MailManager {
    */
   getDefaultMailer(): string {
     return this.config.default;
+  }
+
+  /**
+   * Get the rate limiter instance (for testing)
+   */
+  getRateLimiter(): RateLimiter {
+    return this.rateLimiter;
   }
 
   // ==================== Event Methods ====================

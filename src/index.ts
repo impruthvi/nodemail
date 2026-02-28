@@ -8,6 +8,7 @@ export { MailManager } from './core/MailManager';
 export { Mailable } from './core/Mailable';
 export { Message } from './core/Message';
 export { FailoverManager } from './core/FailoverManager';
+export { RateLimiter } from './core/RateLimiter';
 
 // Providers
 export { SmtpProvider } from './providers/SmtpProvider';

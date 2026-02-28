@@ -24,6 +24,7 @@ export interface MailConfig {
   queue?: QueueConfig;
   markdown?: MarkdownConfig;
   failover?: FailoverConfig;
+  rateLimit?: RateLimitConfig;
 }
 
 export interface TemplateConfig {
@@ -37,6 +38,7 @@ export interface TemplateConfig {
 export interface MailerConfig {
   driver: 'smtp' | 'sendgrid' | 'ses' | 'mailgun' | 'resend' | 'postmark' | 'mailtrap';
   failover?: FailoverConfig;
+  rateLimit?: RateLimitConfig;
   [key: string]: unknown;
 }
 
@@ -198,6 +200,21 @@ export interface PreviewResult {
   bcc?: string | string[] | MailAddress | MailAddress[] | undefined;
   headers?: Record<string, string> | undefined;
   attachments?: Attachment[] | undefined;
+}
+
+// ==================== Rate Limit Types ====================
+
+export interface RateLimitConfig {
+  maxPerWindow: number;
+  windowMs: number;
+  onRateLimited?: (event: RateLimitEvent) => void;
+}
+
+export interface RateLimitEvent {
+  mailer: string;
+  retryAfterMs: number;
+  options: MailOptions;
+  timestamp: string;
 }
 
 // ==================== Queue Types ====================
