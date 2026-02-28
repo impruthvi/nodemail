@@ -10,6 +10,7 @@ import type {
   MailConfig,
   MailOptions,
   MailResponse,
+  PreviewResult,
   QueueJobResult,
   SendingListener,
   SentListener,
@@ -162,6 +163,20 @@ class MailFacade {
     } else {
       this.getInstance().clearListeners();
     }
+  }
+
+  // ==================== Preview Methods ====================
+
+  /**
+   * Preview a mailable without sending it
+   */
+  static async preview(mailable: Mailable): Promise<PreviewResult> {
+    const options = mailable.getMailOptions();
+    if (this.isFaking()) {
+      return this.fakeInstance!.preview(options as MailOptions);
+    }
+    mailable.setMailManager(this.getInstance());
+    return this.getInstance().preview(options as MailOptions);
   }
 
   // ==================== Testing Methods ====================
@@ -481,6 +496,19 @@ class FakeableMessageBuilder {
     }
 
     return realManager.send(this.options as MailOptions);
+  }
+
+  async preview(): Promise<PreviewResult> {
+    if (this.manager instanceof MailFake) {
+      return this.manager.preview(this.options as MailOptions);
+    }
+
+    const realManager = this.manager;
+    if (!(realManager instanceof MailManager)) {
+      throw new Error('Invalid mail manager');
+    }
+
+    return realManager.preview(this.options as MailOptions);
   }
 
   async queue(mailable?: Mailable): Promise<QueueJobResult> {

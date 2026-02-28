@@ -12,6 +12,7 @@ import type {
   MailerConfig,
   Attachment,
   QueueJobResult,
+  PreviewResult,
   SendingEvent,
   SentEvent,
   SendFailedEvent,
@@ -222,9 +223,9 @@ export class MailManager {
   }
 
   /**
-   * Send an email using the default mailer
+   * Preprocess mail options: render markdown, convert priority to headers, render templates
    */
-  async send(options: MailOptions): Promise<MailResponse> {
+  private async preprocess(options: MailOptions): Promise<MailOptions> {
     // Render markdown if present
     if (options.data?.['__markdown']) {
       const markdownContent = options.data['__markdown'] as string;
@@ -309,6 +310,39 @@ export class MailManager {
       );
       options = { ...options, html };
     }
+
+    return options;
+  }
+
+  /**
+   * Preview an email without sending it
+   * Returns the fully preprocessed email (markdown rendered, priority headers, templates)
+   * No events fired, no provider called
+   */
+  async preview(options: MailOptions): Promise<PreviewResult> {
+    const processed = await this.preprocess(options);
+
+    // Merge default from if not set
+    const from = processed.from || this.config.from;
+
+    return {
+      html: processed.html,
+      text: processed.text,
+      subject: processed.subject,
+      from,
+      to: processed.to,
+      cc: processed.cc,
+      bcc: processed.bcc,
+      headers: processed.headers,
+      attachments: processed.attachments,
+    };
+  }
+
+  /**
+   * Send an email using the default mailer
+   */
+  async send(options: MailOptions): Promise<MailResponse> {
+    options = await this.preprocess(options);
 
     const mailerName = this.config.default;
 

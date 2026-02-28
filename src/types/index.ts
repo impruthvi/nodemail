@@ -186,6 +186,20 @@ export type SendingListener = (event: SendingEvent) => boolean | void | Promise<
 export type SentListener = (event: SentEvent) => void | Promise<void>;
 export type SendFailedListener = (event: SendFailedEvent) => void | Promise<void>;
 
+// ==================== Preview Types ====================
+
+export interface PreviewResult {
+  html?: string;
+  text?: string;
+  subject?: string;
+  from?: string | MailAddress | MailAddress[];
+  to: string | string[] | MailAddress | MailAddress[];
+  cc?: string | string[] | MailAddress | MailAddress[];
+  bcc?: string | string[] | MailAddress | MailAddress[];
+  headers?: Record<string, string>;
+  attachments?: Attachment[];
+}
+
 // ==================== Queue Types ====================
 
 export interface QueueConfig {

@@ -9,6 +9,7 @@ import type {
   MailResponse,
   MailProvider,
   MailConfig,
+  PreviewResult,
   SendingEvent,
   SentEvent,
   SendFailedEvent,
@@ -158,6 +159,37 @@ export class MailFake implements MailProvider {
    */
   at(options: MailOptions, _date: Date, mailable?: Mailable): Promise<MailResponse> {
     return this.queue(options, mailable);
+  }
+
+  /**
+   * Preview an email without sending or storing it
+   * Applies priority headers but does not fire events or store messages
+   */
+  preview(options: MailOptions): PreviewResult {
+    let processed = { ...options };
+
+    // Convert priority to headers
+    if (processed.priority) {
+      const map = {
+        high:   { 'X-Priority': '1', 'X-MSMail-Priority': 'High',   'Importance': 'high' },
+        normal: { 'X-Priority': '3', 'X-MSMail-Priority': 'Normal', 'Importance': 'normal' },
+        low:    { 'X-Priority': '5', 'X-MSMail-Priority': 'Low',    'Importance': 'low' },
+      };
+      const existing = processed.headers || {};
+      processed = { ...processed, headers: { ...map[processed.priority], ...existing } };
+    }
+
+    return {
+      html: processed.html,
+      text: processed.text,
+      subject: processed.subject,
+      from: processed.from,
+      to: processed.to,
+      cc: processed.cc,
+      bcc: processed.bcc,
+      headers: processed.headers,
+      attachments: processed.attachments,
+    };
   }
 
   /**

@@ -3,7 +3,7 @@
  */
 
 import * as path from 'path';
-import type { MailOptions, MailResponse } from '../types';
+import type { MailOptions, MailResponse, PreviewResult } from '../types';
 import type { MailManager } from './MailManager';
 
 export abstract class Mailable {
@@ -49,6 +49,25 @@ export abstract class Mailable {
     return this.mailManager.send({
       ...mailOptions,
       to: this.recipients,
+    } as MailOptions);
+  }
+
+  /**
+   * Preview the email without sending it
+   */
+  async preview(): Promise<PreviewResult> {
+    if (!this.mailManager) {
+      throw new Error('Mail manager not configured. Use Mail.preview(mailable) or configure mailable with setMailManager()');
+    }
+
+    const mailOptions = this.getMailOptions();
+    const to = this.recipients && (!Array.isArray(this.recipients) || this.recipients.length > 0)
+      ? this.recipients
+      : mailOptions.to || '';
+
+    return this.mailManager.preview({
+      ...mailOptions,
+      to,
     } as MailOptions);
   }
 

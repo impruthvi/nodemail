@@ -31,6 +31,7 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 - 📦 **Queue Support** - Background email sending with Bull/BullMQ
 - 🔄 **Provider Failover** - Automatic failover chain with retries, delays, and callbacks
 - 🔔 **Email Events** - `sending`, `sent`, `failed` lifecycle hooks for logging, analytics, and cancellation
+- 🔍 **Email Preview** - Preview rendered emails without sending (debug templates, verify headers)
 - 🧪 **Testing Utilities** - Mail::fake() for testing (Laravel-style assertions)
 - 🪶 **Lightweight** - Only ~25MB with SMTP, install additional providers as needed
 - 🔒 **Type-Safe** - Full TypeScript support with strict typing
@@ -572,6 +573,27 @@ Mail.clearListeners();
 | `Mail.clearListeners()` | Remove all event listeners |
 
 Events work in both real and fake mode. Listener errors are silently caught and never break email delivery. See [docs/email-events.md](docs/email-events.md) for the full guide.
+
+## 🔍 Email Preview
+
+Preview emails without sending — useful for debugging templates, verifying headers, and building preview UIs.
+
+```typescript
+// Preview via fluent builder
+const preview = await Mail.to('user@example.com')
+  .subject('Hello')
+  .html('<p>Hi</p>')
+  .priority('high')
+  .preview();
+
+console.log(preview.html);     // '<p>Hi</p>'
+console.log(preview.headers);  // { 'X-Priority': '1', ... }
+
+// Preview a Mailable
+const preview = await Mail.preview(new WelcomeMail().to('user@example.com'));
+```
+
+Preview applies full preprocessing (markdown, templates, priority headers) but fires no events and stores no messages. Works in both real and fake mode. See [docs/email-preview.md](docs/email-preview.md) for the full guide.
 
 ## 📨 Complete Fluent API
 
