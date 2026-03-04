@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-03-04
+
+### Fixed
+
+- Type handling and error management in preview and queue commands
+- Improved async/sync handling in image embedding and priority tests
+
+### Changed
+
+- Added comprehensive test coverage for MailFacade, MailManager, Mailable, and QueueManager
+
 ## [1.1.0] - 2026-03-04
 
 ### Added
