@@ -52,7 +52,7 @@ export class BullMQDriver implements QueueDriver {
   private async getQueue(name: string): Promise<BullMQQueue> {
     await this.loadBullMQ();
 
-    const queueName = `${this.config.prefix}:${name}`;
+    const queueName = `${this.config.prefix}_${name}`;
     let queue = this.queues.get(queueName);
 
     if (!queue) {
@@ -173,7 +173,7 @@ export class BullMQDriver implements QueueDriver {
     void (async () => {
       await this.loadBullMQ();
 
-      const fullQueueName = `${this.config.prefix}:${queueName}`;
+      const fullQueueName = `${this.config.prefix}_${queueName}`;
       const connectionOptions = this.getConnectionOptions();
 
       const worker = new this.Worker!(

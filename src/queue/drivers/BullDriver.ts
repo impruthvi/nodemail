@@ -47,7 +47,7 @@ export class BullDriver implements QueueDriver {
   private async getQueue(name: string): Promise<BullQueue> {
     await this.loadBull();
 
-    const queueName = `${this.config.prefix}:${name}`;
+    const queueName = `${this.config.prefix}_${name}`;
     let queue = this.queues.get(queueName);
 
     if (!queue) {
