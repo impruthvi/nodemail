@@ -244,8 +244,7 @@ export class BullDriver implements QueueDriver {
     }
 
     // Bull clean method: clean(grace, status, limit)
-    const cleanStatus = status as 'completed' | 'failed' | 'delayed';
-    await queue.clean(0, cleanStatus, count);
+    await queue.clean(0, status, count);
 
     return count;
   }

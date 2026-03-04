@@ -67,28 +67,28 @@ export async function loadConfig(customPath?: string): Promise<LoadedConfig> {
 
     // For TypeScript files, we need tsx or ts-node to handle them
     // The CLI should be run with tsx or the config should be compiled
-    const module = await import(fileUrl);
+    const module = (await import(fileUrl)) as Record<string, unknown>;
 
-    const config = module.default || module;
+    const config = (module['default'] ?? module) as Record<string, unknown>;
 
-    if (!config.default || !config.mailers) {
+    if (!config['default'] || !config['mailers']) {
       // Check if it's wrapped in default export
-      const actualConfig = config.default || config;
+      const actualConfig = (config['default'] ?? config) as Record<string, unknown>;
 
-      if (!actualConfig.default || !actualConfig.mailers) {
+      if (!actualConfig['default'] || !actualConfig['mailers']) {
         throw new Error(
           'Invalid config format. Config must export a MailConfig object with "default" and "mailers" properties.'
         );
       }
 
       return {
-        config: actualConfig as MailConfig,
+        config: actualConfig as unknown as MailConfig,
         configPath,
       };
     }
 
     return {
-      config: config as MailConfig,
+      config: config as unknown as MailConfig,
       configPath,
     };
   } catch (error) {

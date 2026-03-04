@@ -38,8 +38,8 @@ export async function preview(mailablePath: string, options: PreviewOptions): Pr
     let constructorData: unknown[] = [];
     if (options.data) {
       try {
-        const parsed = JSON.parse(options.data);
-        constructorData = Array.isArray(parsed) ? parsed : [parsed];
+        const parsed: unknown = JSON.parse(options.data);
+        constructorData = Array.isArray(parsed) ? (parsed as unknown[]) : [parsed];
       } catch {
         await spinner.fail('Invalid JSON data provided');
         process.exit(1);
@@ -48,7 +48,7 @@ export async function preview(mailablePath: string, options: PreviewOptions): Pr
 
     // Dynamically import the mailable
     const fileUrl = pathToFileURL(absolutePath).href;
-    const module = await import(fileUrl);
+    const module: Record<string, unknown> = (await import(fileUrl)) as Record<string, unknown>;
 
     // Find the mailable class (first exported class)
     type MailableConstructor = new (...args: unknown[]) => Mailable;
@@ -56,15 +56,19 @@ export async function preview(mailablePath: string, options: PreviewOptions): Pr
 
     for (const key of Object.keys(module)) {
       const exported = module[key];
-      if (typeof exported === 'function' && exported.prototype?.build) {
+      if (
+        typeof exported === 'function' &&
+        (exported as { prototype?: { build?: unknown } }).prototype?.build
+      ) {
         MailableClass = exported as MailableConstructor;
         break;
       }
     }
 
     // Check default export if not found
-    if (!MailableClass && module.default && typeof module.default === 'function') {
-      MailableClass = module.default as MailableConstructor;
+    const defaultExport = module['default'] as { prototype?: { build?: unknown } } | undefined;
+    if (!MailableClass && defaultExport && typeof defaultExport === 'function') {
+      MailableClass = defaultExport as MailableConstructor;
     }
 
     if (!MailableClass) {
@@ -103,14 +107,8 @@ export async function preview(mailablePath: string, options: PreviewOptions): Pr
     // Open in browser
     try {
       // Dynamic import for optional 'open' package
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const openBrowser = async (url: string) => {
-        const mod = await (Function('return import("open")')() as Promise<{
-          default: (path: string) => Promise<unknown>;
-        }>);
-        return mod.default(url);
-      };
-      await openBrowser(tempFile);
+      const openModule = (await import('open')) as { default: (path: string) => Promise<unknown> };
+      await openModule.default(tempFile);
     } catch {
       await output.warning('Could not open browser automatically.');
       await output.info(`Open this file manually: ${tempFile}`);

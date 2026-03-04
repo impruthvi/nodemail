@@ -55,12 +55,14 @@ export async function queueWork(options: QueueWorkOptions): Promise<void> {
     }, options.queue);
 
     // Keep the process running
-    process.on('SIGINT', async () => {
+    process.on('SIGINT', () => {
       output.newline();
-      await output.info('Shutting down worker...');
-      await queueManager.close();
-      await output.success('Worker stopped');
-      process.exit(0);
+      void (async () => {
+        await output.info('Shutting down worker...');
+        await queueManager.close();
+        await output.success('Worker stopped');
+        process.exit(0);
+      })();
     });
 
     // Prevent the process from exiting
