@@ -247,7 +247,7 @@ describe('MailFacade - Coverage Tests', () => {
       Mail.fake();
     });
 
-    it('should embed image by file path', async () => {
+    it('should embed image by file path', () => {
       const builder = Mail.to('user@test.com')
         .subject('Embed Test')
         .html('<img src="cid:logo">')
@@ -257,7 +257,7 @@ describe('MailFacade - Coverage Tests', () => {
       expect(builder.options.attachments![0].cid).toBe('logo');
     });
 
-    it('should embed image with custom filename', async () => {
+    it('should embed image with custom filename', () => {
       const builder = Mail.to('user@test.com')
         .subject('Embed Test')
         .html('<img src="cid:logo">')
@@ -266,7 +266,7 @@ describe('MailFacade - Coverage Tests', () => {
       expect(builder.options.attachments![0].filename).toBe('custom-logo.jpg');
     });
 
-    it('should embed image data with buffer', async () => {
+    it('should embed image data with buffer', () => {
       const buffer = Buffer.from('fake image data');
       const builder = Mail.to('user@test.com')
         .subject('Embed Test')
@@ -277,7 +277,7 @@ describe('MailFacade - Coverage Tests', () => {
       expect(builder.options.attachments![0].content).toBe(buffer);
     });
 
-    it('should embed image data with custom filename', async () => {
+    it('should embed image data with custom filename', () => {
       const builder = Mail.to('user@test.com')
         .subject('Embed Test')
         .html('<img src="cid:logo">')
@@ -293,7 +293,7 @@ describe('MailFacade - Coverage Tests', () => {
       Mail.fake();
     });
 
-    it('should set priority to high', async () => {
+    it('should set priority to high', () => {
       const builder = Mail.to('user@test.com')
         .subject('Priority Test')
         .html('<p>High priority</p>')
@@ -302,7 +302,7 @@ describe('MailFacade - Coverage Tests', () => {
       expect(builder.options.priority).toBe('high');
     });
 
-    it('should set priority to low', async () => {
+    it('should set priority to low', () => {
       const builder = Mail.to('user@test.com')
         .subject('Priority Test')
         .html('<p>Low priority</p>')
