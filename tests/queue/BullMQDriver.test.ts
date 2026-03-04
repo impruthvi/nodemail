@@ -162,7 +162,7 @@ describe('BullMQDriver', () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(MockWorkerConstructor).toHaveBeenCalledWith(
-        'nodemail:mail',
+        'nodemail_mail',
         expect.any(Function),
         expect.objectContaining({ concurrency: 5 })
       );
