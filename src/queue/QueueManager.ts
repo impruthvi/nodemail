@@ -8,6 +8,8 @@ import type {
   QueueDriver,
   QueuedMailJob,
   QueueJobResult,
+  QueueJobCounts,
+  FailedJob,
   MailOptions,
   MailResponse,
 } from '../types';
@@ -142,11 +144,7 @@ export class QueueManager {
   /**
    * Schedule a mail job for a specific time
    */
-  async at(
-    mailOptions: MailOptions,
-    date: Date,
-    queueName?: string
-  ): Promise<QueueJobResult> {
+  async at(mailOptions: MailOptions, date: Date, queueName?: string): Promise<QueueJobResult> {
     const driver = await this.getDriver();
     const delayMs = date.getTime() - Date.now();
     const job = this.createJob(mailOptions, Math.floor(delayMs / 1000));
@@ -207,5 +205,52 @@ export class QueueManager {
    */
   getConfig(): QueueConfig {
     return this.config;
+  }
+
+  /**
+   * Get job counts by status
+   */
+  async getJobCounts(queueName?: string): Promise<QueueJobCounts | null> {
+    const driver = await this.getDriver();
+    if (!driver.getJobCounts) {
+      return null;
+    }
+    return driver.getJobCounts(queueName || this.config.defaultQueue);
+  }
+
+  /**
+   * Clear jobs by status
+   */
+  async clearJobs(
+    status: 'failed' | 'completed' | 'delayed' | 'waiting',
+    queueName?: string
+  ): Promise<number> {
+    const driver = await this.getDriver();
+    if (!driver.clear) {
+      throw new Error('Queue driver does not support clearing jobs');
+    }
+    return driver.clear(status, queueName || this.config.defaultQueue);
+  }
+
+  /**
+   * Retry all failed jobs
+   */
+  async retryFailedJobs(queueName?: string): Promise<number> {
+    const driver = await this.getDriver();
+    if (!driver.retryFailed) {
+      throw new Error('Queue driver does not support retrying failed jobs');
+    }
+    return driver.retryFailed(queueName || this.config.defaultQueue);
+  }
+
+  /**
+   * Get failed jobs
+   */
+  async getFailedJobs(queueName?: string, limit = 100): Promise<FailedJob[]> {
+    const driver = await this.getDriver();
+    if (!driver.getFailedJobs) {
+      return [];
+    }
+    return driver.getFailedJobs(queueName || this.config.defaultQueue, limit);
   }
 }

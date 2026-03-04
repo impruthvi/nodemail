@@ -141,9 +141,9 @@ export interface MailResponse {
 
 export interface FailoverConfig {
   chain: string[];
-  maxRetriesPerProvider?: number;  // default: 1
-  retryDelay?: number;             // default: 0
-  failoverDelay?: number;          // default: 0
+  maxRetriesPerProvider?: number; // default: 1
+  retryDelay?: number; // default: 0
+  failoverDelay?: number; // default: 0
   onFailover?: (event: FailoverEvent) => void;
 }
 
@@ -261,6 +261,22 @@ export interface QueueJobResult {
   error?: string;
 }
 
+export interface QueueJobCounts {
+  waiting: number;
+  active: number;
+  completed: number;
+  failed: number;
+  delayed: number;
+}
+
+export interface FailedJob {
+  id: string;
+  mailOptions: MailOptions;
+  failedReason: string;
+  attemptsMade: number;
+  failedAt: Date;
+}
+
 export interface QueueDriver {
   /**
    * Add a job to the queue
@@ -286,4 +302,27 @@ export interface QueueDriver {
    * Close the queue connection
    */
   close(): Promise<void>;
+
+  /**
+   * Get job counts by status (optional - for CLI)
+   */
+  getJobCounts?(queueName?: string): Promise<QueueJobCounts>;
+
+  /**
+   * Clear jobs by status (optional - for CLI)
+   */
+  clear?(
+    status: 'failed' | 'completed' | 'delayed' | 'waiting',
+    queueName?: string
+  ): Promise<number>;
+
+  /**
+   * Retry all failed jobs (optional - for CLI)
+   */
+  retryFailed?(queueName?: string): Promise<number>;
+
+  /**
+   * Get failed jobs (optional - for CLI)
+   */
+  getFailedJobs?(queueName?: string, limit?: number): Promise<FailedJob[]>;
 }

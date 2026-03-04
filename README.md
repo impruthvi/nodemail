@@ -22,7 +22,7 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 
 ## ✨ Features
 
-### ✅ Available Now (v1.0.1)
+### ✅ Available Now (v1.1.0)
 
 - 🎯 **Multiple Providers** - SMTP (Nodemailer), SendGrid, AWS SES, Mailgun, Resend, Postmark
 - 🎨 **Template Engines** - Handlebars, EJS, Pug support with dynamic loading
@@ -34,6 +34,7 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 - 🔍 **Email Preview** - Preview rendered emails without sending (debug templates, verify headers)
 - ⏱️ **Rate Limiting** - Per-provider rate limiting with sliding window algorithm
 - 🧪 **Testing Utilities** - Mail::fake() for testing (Laravel-style assertions)
+- 🎨 **CLI Tools** - Queue management, email preview, code generation, config validation
 - 🪶 **Lightweight** - Only ~25MB with SMTP, install additional providers as needed
 - 🔒 **Type-Safe** - Full TypeScript support with strict typing
 - ✨ **Complete Fluent API** - Chain to(), subject(), html(), template(), data(), cc(), bcc(), attachments(), headers()
@@ -45,7 +46,6 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 - 🔔 **Notifications** - Multi-channel notification system
 - 🌍 **i18n Support** - Multi-language emails
 - 🚀 **More Providers** - Mailtrap and others
-- 🎨 **Enhanced CLI** - Command-line tools for queue management
 
 ## 📦 Installation
 
@@ -56,7 +56,7 @@ npm install @impruthvi/nodemail
 Or install a specific version:
 
 ```bash
-npm install @impruthvi/nodemail@1.0.1
+npm install @impruthvi/nodemail@1.1.0
 ```
 
 **Lightweight by default!** Only includes SMTP support (~25MB).
@@ -427,6 +427,59 @@ await Mail.to('user@example.com').at(new Date('2026-12-25'), new ChristmasEmail(
 await Mail.processQueue();
 ```
 
+## 🎨 CLI Tools
+
+The CLI provides commands for queue management, email preview, code generation, and configuration validation.
+
+### Quick Reference
+
+```bash
+# Queue management
+npx nodemail queue:work              # Start processing queued emails
+npx nodemail queue:status            # Show queue job counts
+npx nodemail queue:clear --status failed   # Clear failed jobs
+npx nodemail queue:retry             # Retry failed jobs
+
+# Email preview and testing
+npx nodemail preview --mailable ./src/mail/WelcomeEmail.ts
+npx nodemail send:test --to you@example.com
+
+# Code generation
+npx nodemail make:mailable WelcomeEmail
+npx nodemail make:mailable NewsletterEmail --markdown
+
+# Configuration
+npx nodemail config:check            # Validate configuration
+npx nodemail config:check --test     # Validate and test connections
+```
+
+### Configuration File
+
+Create a `nodemail.config.ts` in your project root:
+
+```typescript
+import { defineConfig } from '@impruthvi/nodemail';
+
+export default defineConfig({
+  default: 'smtp',
+  from: { address: 'noreply@example.com', name: 'My App' },
+  mailers: {
+    smtp: {
+      driver: 'smtp',
+      host: process.env.SMTP_HOST,
+      port: 587,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    },
+  },
+  queue: {
+    driver: 'bullmq',
+    connection: { host: 'localhost', port: 6379 },
+  },
+});
+```
+
+For styled terminal output, install chalk: `npm install chalk`
+
 ## 🔄 Provider Failover
 
 Automatically fail over to backup providers when the primary provider fails. Supports retries, delays, and monitoring callbacks.
@@ -566,12 +619,12 @@ Mail.clearListeners();
 
 ### Event Methods
 
-| Method | Description |
-| --- | --- |
+| Method                     | Description                                                                                |
+| -------------------------- | ------------------------------------------------------------------------------------------ |
 | `Mail.onSending(listener)` | Register listener before send (can cancel with `return false`, can mutate `event.options`) |
-| `Mail.onSent(listener)` | Register listener after successful send |
-| `Mail.onFailed(listener)` | Register listener on send failure |
-| `Mail.clearListeners()` | Remove all event listeners |
+| `Mail.onSent(listener)`    | Register listener after successful send                                                    |
+| `Mail.onFailed(listener)`  | Register listener on send failure                                                          |
+| `Mail.clearListeners()`    | Remove all event listeners                                                                 |
 
 Events work in both real and fake mode. Listener errors are silently caught and never break email delivery. See [docs/email-events.md](docs/email-events.md) for the full guide.
 
@@ -587,8 +640,8 @@ const preview = await Mail.to('user@example.com')
   .priority('high')
   .preview();
 
-console.log(preview.html);     // '<p>Hi</p>'
-console.log(preview.headers);  // { 'X-Priority': '1', ... }
+console.log(preview.html); // '<p>Hi</p>'
+console.log(preview.headers); // { 'X-Priority': '1', ... }
 
 // Preview a Mailable
 const preview = await Mail.preview(new WelcomeMail().to('user@example.com'));
@@ -617,19 +670,21 @@ Mail.configure({
   from: { address: 'noreply@example.com', name: 'App' },
   mailers: {
     smtp: {
-      driver: 'smtp', host: 'localhost', port: 587,
+      driver: 'smtp',
+      host: 'localhost',
+      port: 587,
       rateLimit: { maxPerWindow: 10, windowMs: 1000 },
     },
     sendgrid: {
-      driver: 'sendgrid', apiKey: '...',
+      driver: 'sendgrid',
+      apiKey: '...',
       rateLimit: { maxPerWindow: 100, windowMs: 1000 },
     },
   },
 });
 
 // When exceeded — returns { success: false }, no throw
-const result = await Mail.to('user@example.com')
-  .subject('Hi').html('<p>Hi</p>').send();
+const result = await Mail.to('user@example.com').subject('Hi').html('<p>Hi</p>').send();
 // result = { success: false, error: 'Rate limit exceeded for mailer "smtp". Try again in 450ms.' }
 
 // Optional callback
@@ -896,11 +951,24 @@ sent.getHtml(); // Get HTML content
 - ✅ Rate Limiting — per-provider sliding window algorithm
 - ✅ 522 passing tests
 
-**Phase 9+** 🚧 Coming Soon
+**Phase 9: Enhanced CLI** ✅ Complete (v1.1.0)
+
+- ✅ CLI tool with 8 commands for queue management, email preview, and code generation
+- ✅ `queue:work` - Start processing queued emails with concurrency control
+- ✅ `queue:status` - Show queue job counts
+- ✅ `queue:clear` - Clear jobs by status (completed, failed, delayed, waiting)
+- ✅ `queue:retry` - Retry failed jobs with optional limit
+- ✅ `preview` - Preview email in browser without sending
+- ✅ `send:test` - Send test email to verify configuration
+- ✅ `make:mailable` - Generate Mailable class (with markdown/template options)
+- ✅ `config:check` - Validate configuration with optional connection testing
+- ✅ `defineConfig` helper for TypeScript autocomplete in config files
+- ✅ Auto-detection of nodemail.config.ts/js config files
+
+**Phase 10+** 🚧 Coming Soon
 
 - 🔔 Notifications - Multi-channel notification system
 - 🌍 i18n Support - Multi-language emails
-- 🎨 Enhanced CLI - Command-line tools
 - 🚀 More Providers - Mailtrap and others
 
 ## 🤝 Contributing

@@ -8,6 +8,8 @@ import type {
   QueueDriver,
   QueuedMailJob,
   QueueJobResult,
+  QueueJobCounts,
+  FailedJob,
   MailResponse,
 } from '../../types';
 
@@ -35,9 +37,7 @@ export class BullDriver implements QueueDriver {
       const bull = await import('bull');
       this.Bull = bull.default || bull;
     } catch {
-      throw new Error(
-        'Bull is not installed. Please install it with: npm install bull'
-      );
+      throw new Error('Bull is not installed. Please install it with: npm install bull');
     }
   }
 
@@ -151,11 +151,7 @@ export class BullDriver implements QueueDriver {
   /**
    * Add a job scheduled for a specific time
    */
-  async addScheduled(
-    job: QueuedMailJob,
-    date: Date,
-    queueName?: string
-  ): Promise<QueueJobResult> {
+  async addScheduled(job: QueuedMailJob, date: Date, queueName?: string): Promise<QueueJobResult> {
     const delayMs = date.getTime() - Date.now();
     if (delayMs < 0) {
       // If the date is in the past, execute immediately
@@ -167,10 +163,7 @@ export class BullDriver implements QueueDriver {
   /**
    * Process jobs from the queue
    */
-  process(
-    queueName: string,
-    handler: (job: QueuedMailJob) => Promise<MailResponse>
-  ): void {
+  process(queueName: string, handler: (job: QueuedMailJob) => Promise<MailResponse>): void {
     // We need to wrap this in an async IIFE since process can't be async
     void (async () => {
       const queue = await this.getQueue(queueName);
@@ -208,5 +201,92 @@ export class BullDriver implements QueueDriver {
       await queue.close();
     }
     this.queues.clear();
+  }
+
+  /**
+   * Get job counts by status
+   */
+  async getJobCounts(queueName?: string): Promise<QueueJobCounts> {
+    const name = queueName || this.config.defaultQueue || 'mail';
+    const queue = await this.getQueue(name);
+    const counts = await queue.getJobCounts();
+    return {
+      waiting: counts.waiting || 0,
+      active: counts.active || 0,
+      completed: counts.completed || 0,
+      failed: counts.failed || 0,
+      delayed: counts.delayed || 0,
+    };
+  }
+
+  /**
+   * Clear jobs by status
+   */
+  async clear(
+    status: 'failed' | 'completed' | 'delayed' | 'waiting',
+    queueName?: string
+  ): Promise<number> {
+    const name = queueName || this.config.defaultQueue || 'mail';
+    const queue = await this.getQueue(name);
+
+    // Get count before clearing
+    const counts = await queue.getJobCounts();
+    const count = counts[status] || 0;
+
+    // Bull clean method only supports 'completed', 'failed', 'delayed'
+    // For 'waiting', we need to manually remove jobs
+    if (status === 'waiting') {
+      const waiting = await queue.getWaiting(0, -1);
+      for (const job of waiting) {
+        await job.remove();
+      }
+      return waiting.length;
+    }
+
+    // Bull clean method: clean(grace, status, limit)
+    const cleanStatus = status as 'completed' | 'failed' | 'delayed';
+    await queue.clean(0, cleanStatus, count);
+
+    return count;
+  }
+
+  /**
+   * Retry all failed jobs
+   */
+  async retryFailed(queueName?: string): Promise<number> {
+    const name = queueName || this.config.defaultQueue || 'mail';
+    const queue = await this.getQueue(name);
+
+    const failed = await queue.getFailed(0, -1);
+    let retried = 0;
+
+    for (const job of failed) {
+      try {
+        await job.retry();
+        retried++;
+      } catch {
+        // Job may have been removed or is not retryable
+      }
+    }
+
+    return retried;
+  }
+
+  /**
+   * Get failed jobs
+   */
+  async getFailedJobs(queueName?: string, limit = 100): Promise<FailedJob[]> {
+    const name = queueName || this.config.defaultQueue || 'mail';
+    const queue = await this.getQueue(name);
+
+    const failed = await queue.getFailed(0, limit - 1);
+
+    return failed.map((job) => ({
+      id: String(job.id),
+      mailOptions: (job.data as QueuedMailJob).mailOptions,
+      failedReason: job.failedReason || 'Unknown error',
+      attemptsMade: job.attemptsMade,
+      failedAt: new Date(job.finishedOn || Date.now()),
+    }));
   }
 }

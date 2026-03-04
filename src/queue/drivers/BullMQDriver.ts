@@ -8,6 +8,8 @@ import type {
   QueueDriver,
   QueuedMailJob,
   QueueJobResult,
+  QueueJobCounts,
+  FailedJob,
   MailResponse,
 } from '../../types';
 
@@ -154,11 +156,7 @@ export class BullMQDriver implements QueueDriver {
   /**
    * Add a job scheduled for a specific time
    */
-  async addScheduled(
-    job: QueuedMailJob,
-    date: Date,
-    queueName?: string
-  ): Promise<QueueJobResult> {
+  async addScheduled(job: QueuedMailJob, date: Date, queueName?: string): Promise<QueueJobResult> {
     const delayMs = date.getTime() - Date.now();
     if (delayMs < 0) {
       // If the date is in the past, execute immediately
@@ -170,10 +168,7 @@ export class BullMQDriver implements QueueDriver {
   /**
    * Process jobs from the queue
    */
-  process(
-    queueName: string,
-    handler: (job: QueuedMailJob) => Promise<MailResponse>
-  ): void {
+  process(queueName: string, handler: (job: QueuedMailJob) => Promise<MailResponse>): void {
     // We need to wrap this in an async IIFE since process can't be async
     void (async () => {
       await this.loadBullMQ();
@@ -229,5 +224,82 @@ export class BullMQDriver implements QueueDriver {
       await queue.close();
     }
     this.queues.clear();
+  }
+
+  /**
+   * Get job counts by status
+   */
+  async getJobCounts(queueName?: string): Promise<QueueJobCounts> {
+    const name = queueName || this.config.defaultQueue || 'mail';
+    const queue = await this.getQueue(name);
+    const counts = await queue.getJobCounts('waiting', 'active', 'completed', 'failed', 'delayed');
+    return {
+      waiting: counts['waiting'] || 0,
+      active: counts['active'] || 0,
+      completed: counts['completed'] || 0,
+      failed: counts['failed'] || 0,
+      delayed: counts['delayed'] || 0,
+    };
+  }
+
+  /**
+   * Clear jobs by status
+   */
+  async clear(
+    status: 'failed' | 'completed' | 'delayed' | 'waiting',
+    queueName?: string
+  ): Promise<number> {
+    const name = queueName || this.config.defaultQueue || 'mail';
+    const queue = await this.getQueue(name);
+
+    // Get count before clearing
+    const counts = await queue.getJobCounts(status);
+    const count = counts[status] || 0;
+
+    // BullMQ clean method: clean(grace, limit, type)
+    // grace = 0 means clean immediately
+    await queue.clean(0, count, status);
+
+    return count;
+  }
+
+  /**
+   * Retry all failed jobs
+   */
+  async retryFailed(queueName?: string): Promise<number> {
+    const name = queueName || this.config.defaultQueue || 'mail';
+    const queue = await this.getQueue(name);
+
+    const failed = await queue.getFailed(0, -1);
+    let retried = 0;
+
+    for (const job of failed) {
+      try {
+        await job.retry();
+        retried++;
+      } catch {
+        // Job may have been removed or is not retryable
+      }
+    }
+
+    return retried;
+  }
+
+  /**
+   * Get failed jobs
+   */
+  async getFailedJobs(queueName?: string, limit = 100): Promise<FailedJob[]> {
+    const name = queueName || this.config.defaultQueue || 'mail';
+    const queue = await this.getQueue(name);
+
+    const failed = await queue.getFailed(0, limit - 1);
+
+    return failed.map((job) => ({
+      id: job.id || 'unknown',
+      mailOptions: (job.data as QueuedMailJob).mailOptions,
+      failedReason: job.failedReason || 'Unknown error',
+      attemptsMade: job.attemptsMade,
+      failedAt: new Date(job.finishedOn || Date.now()),
+    }));
   }
 }

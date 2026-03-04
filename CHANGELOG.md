@@ -7,165 +7,282 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-03-04
+
+### Added
+
+- **Enhanced CLI** (Phase 9 complete)
+  - New `nodemail` CLI tool with 8 commands
+  - `queue:work` - Start processing queued emails with concurrency control
+  - `queue:status` - Show queue job counts (waiting, active, completed, failed, delayed, paused)
+  - `queue:clear` - Clear jobs by status (completed, failed, delayed, waiting)
+  - `queue:retry` - Retry failed jobs with optional limit
+  - `preview` - Preview email in browser without sending (requires `open` package)
+  - `send:test` - Send test email to verify configuration
+  - `make:mailable` - Generate Mailable class with markdown/template options
+  - `config:check` - Validate configuration with optional connection testing
+- **Configuration file support**
+  - Auto-detection of `nodemail.config.ts/js/mjs/cjs` in project root
+  - `defineConfig` helper export for TypeScript autocomplete
+- **Queue driver enhancements**
+  - Added `getJobCounts()` method to QueueDriver interface
+  - Added `clear()` method to clear jobs by status
+  - Added `retryFailed()` method to retry failed jobs
+  - Added `getFailedJobs()` method to list failed jobs
+  - New `QueueJobCounts` and `FailedJob` types
+
+### Changed
+
+- Updated package.json to version 1.1.0
+- Added `bin` entry for `nodemail` CLI command
+- Added `chalk` and `open` as optional dependencies
+- Extended `QueueDriver` interface with new inspection methods
+- Implemented new methods in BullMQDriver and BullDriver
+
+### Fixed
+
+- TypeScript strict mode compliance for CLI commands
+- Index signature property access in config validation
+
+## [1.0.1] - 2026-02-15
+
+### Added
+
+- **Embedded Images** - CID support for inline images in HTML emails
+- **Email Priority Levels** - `high`, `normal`, `low` priority with X-Priority headers
+  - `Message.priority()` method for setting priority
+  - `AssertableMessage.hasPriority()` and `getPriority()` for testing
+- **Email Events System** - Lifecycle hooks for logging, analytics, and cancellation
+  - `Mail.onSending()` - Hook before send (can cancel with `return false`, can mutate options)
+  - `Mail.onSent()` - Hook after successful send
+  - `Mail.onFailed()` - Hook on send failure
+  - `Mail.clearListeners()` - Remove all event listeners
+- **Email Preview** - Render emails without sending
+  - `MessageBuilder.preview()` - Preview via fluent builder
+  - `Mail.preview(mailable)` - Preview a Mailable instance
+  - Full preprocessing (markdown, templates, priority headers) without firing events
+- **Rate Limiting** - Per-provider sliding window algorithm
+  - Global rate limit configuration
+  - Per-mailer rate limit overrides
+  - `onRateLimited` callback for monitoring
+  - Returns `{ success: false }` when rate limited (no throw)
+
+### Changed
+
+- Updated package.json to version 1.0.1
+- 522 passing tests
+
+## [1.0.0] - 2026-01-20
+
+### Added
+
+- **Provider Failover** (Phase 8 complete)
+  - `FailoverManager` with automatic provider chain
+  - Configurable retries per provider (`maxRetriesPerProvider`)
+  - Retry delays between attempts (`retryDelay`)
+  - Failover delays between providers (`failoverDelay`)
+  - `onFailover` callback for monitoring/logging failover events
+  - Per-mailer failover configuration overrides
+  - Response metadata: `provider`, `failoverUsed`, `failoverAttempts`
+- **MailFake failover testing**
+  - `Mail.simulateFailures(n)` - Simulate failures for first N sends
+  - `Mail.resetFailures()` - Clear failure simulation state
+  - `AssertableMessage.wasFailoverUsed()`, `getProvider()`, `getFailoverAttempts()`
+
+### Changed
+
+- Updated package.json to version 1.0.0
+- 269 passing tests
+
+## [0.7.0] - 2026-01-05
+
+### Added
+
+- **Markdown Mail** (Phase 7 complete)
+  - `MarkdownMailable` base class for markdown-based emails
+  - `MarkdownRenderer` with CSS inlining via `juice`
+  - Built-in components:
+    - `[button url="..." color="primary|success|error"]...[/button]`
+    - `[panel]...[/panel]`
+    - `[table]...[/table]`
+  - Default responsive email theme
+  - Custom themes and CSS support via `theme()` method
+  - Markdown configuration in `MailConfig`
+- **AssertableMessage markdown assertions**
+  - `isMarkdown()` - Check if built from markdown
+  - `getMarkdown()` - Get raw markdown source
+  - `markdownContains()` - Check markdown source content
+
+### Changed
+
+- Updated package.json to version 0.7.0
+- Added `marked` and `juice` as peer dependencies (optional)
+
+## [0.6.0] - 2025-12-20
+
+### Added
+
+- **Queue Management** (Phase 6 complete)
+  - `QueueManager` with Bull and BullMQ drivers
+  - `BullMQDriver` - Modern queue driver using BullMQ
+  - `BullDriver` - Legacy queue driver using Bull
+  - Immediate queueing via `Mail.to().queue()`
+  - Delayed sending via `Mail.to().later(seconds, mailable)`
+  - Scheduled delivery via `Mail.to().at(date, mailable)`
+  - Automatic retries with configurable backoff (fixed, exponential)
+  - `Mail.processQueue()` for worker processes
+- **MailFake queue assertions**
+  - `Mail.assertQueued(Mailable)` - Assert mailable was queued
+  - `Mail.assertNothingQueued()` - Assert nothing was queued
+  - `Mail.hasQueued()` - Check if any messages were queued
+
+### Changed
+
+- Updated package.json to version 0.6.0
+- Added `bullmq` and `bull` as peer dependencies (optional)
+- Queue configuration added to `MailConfig`
+
+## [0.5.0] - 2025-12-12
+
+### Added
+
+- **Testing Utilities** (Phase 5 complete)
+  - `Mail.fake()` - Enable fake mode (store emails instead of sending)
+  - `Mail.restore()` - Restore real mailer
+  - `MailFake` class for test mode management
+  - `AssertableMessage` class for inspecting sent messages
+- **Assertions**
+  - `Mail.assertSent(Mailable)` - Assert mailable was sent
+  - `Mail.assertSent(Mailable, callback)` - Assert with custom conditions
+  - `Mail.assertSentCount(Mailable, count)` - Assert sent exactly N times
+  - `Mail.assertNotSent(Mailable)` - Assert mailable was NOT sent
+  - `Mail.assertNothingSent()` - Assert no emails were sent
+  - `Mail.sent()` - Get all sent messages
+  - `Mail.sent(Mailable)` - Get sent messages of specific type
+  - `Mail.hasSent()` - Check if any messages were sent
+- **AssertableMessage methods**
+  - `hasTo()`, `hasCc()`, `hasBcc()` - Check recipients
+  - `hasSubject()`, `subjectContains()` - Check subject
+  - `htmlContains()`, `textContains()` - Check content
+  - `hasAttachments()`, `hasAttachment()` - Check attachments
+  - `hasHeader()` - Check headers
+  - `getTo()`, `getSubject()`, `getHtml()` - Get values
+
+### Changed
+
+- Updated package.json to version 0.5.0
+
 ## [0.4.0] - 2025-12-07
 
 ### Added
+
 - **Template Engine Support** (Phase 4 complete)
-  - HandlebarsEngine with dynamic loading and caching
-  - EjsEngine with dynamic loading and caching
-  - PugEngine with dynamic loading and caching
-  - TemplateEngine interface for custom engines
+  - `HandlebarsEngine` with dynamic loading and caching
+  - `EjsEngine` with dynamic loading and caching
+  - `PugEngine` with dynamic loading and caching
+  - `TemplateEngine` interface for custom engines
 - **Complete Fluent API** - All email options now chainable
-  - Added `cc()` method for carbon copy recipients
-  - Added `bcc()` method for blind carbon copy recipients
-  - Added `replyTo()` method for reply-to addresses
-  - Added `attachments()` method for file attachments
-  - Added `headers()` method for custom headers
-- **Laravel-like Mailable Pattern** - Elegant email class API
+  - `cc()` method for carbon copy recipients
+  - `bcc()` method for blind carbon copy recipients
+  - `replyTo()` method for reply-to addresses
+  - `attachments()` method for file attachments
+  - `headers()` method for custom headers
+- **Laravel-like Mailable Pattern**
   - `Mailable.to()` method for setting recipients
   - `Mailable.send()` method for direct sending
   - `Mail.to().send(mailable)` Laravel-style syntax (recommended)
-  - `mailable.to().send()` alternative direct syntax
   - Protected methods: `cc()`, `bcc()`, `replyTo()`, `attach()`, `withHeaders()`
-- Enhanced MailManager with automatic template rendering
-- Added template configuration to MailConfig
+- Template configuration in `MailConfig`
   - Support for 'handlebars', 'ejs', 'pug' engines
   - Custom engine instance support
   - Configurable views path, extension, and caching
-- Template engine tests (34 new tests)
-  - HandlebarsEngine.test.ts (11 tests)
-  - EjsEngine.test.ts (11 tests)
-  - PugEngine.test.ts (12 tests)
-- Mailable tests (10 new tests)
-  - Comprehensive Mailable class testing
-  - Template support validation
-  - Laravel-style API testing
-- Template examples
-  - examples/with-handlebars.ts
-  - examples/with-ejs.ts
-  - examples/with-pug.ts
-  - examples/with-mailable-templates.ts (refactored)
-  - examples/views/ directory with sample templates
-- Test utilities
-  - test-smtp-ethereal.ts for instant SMTP testing
-  - test-templates.ts for template engine validation
 
 ### Changed
+
 - **BREAKING**: Refactored Mailable class to Laravel-like pattern
   - Removed `getMailOptions()` method
   - Now uses `build()` method with fluent API
-  - Direct sending capability added
 - Updated package.json to version 0.4.0
 - Added handlebars, ejs, pug to peerDependencies (all optional)
-- Enhanced MessageBuilder.send() to accept Mailable instances
-- Updated test suite: 122 total tests (17 new tests added)
-- Code coverage: 85%+ overall
-- Template engines coverage: 93.5%
-- ESLint configuration for all directories (src, examples, tests)
+- Enhanced `MessageBuilder.send()` to accept Mailable instances
+- 122 total tests
 
 ### Fixed
+
 - Type safety for template engine configuration
 - Promise handling in template rendering
-- ESLint warnings for template engine dynamic loading
-- ESLint parsing errors for examples directory
-- Floating promise warnings in example files
 
 ## [0.3.0] - 2025-11-25
 
 ### Added
+
 - **New email providers** (3 additional providers)
-  - MailgunProvider with dynamic loading
-  - ResendProvider with dynamic loading
-  - PostmarkProvider with dynamic loading
-- Example files for new providers
-  - examples/mailgun.ts
-  - examples/resend.ts
-  - examples/postmark.ts
-- Support for all provider-specific features
+  - `MailgunProvider` with dynamic loading
+  - `ResendProvider` with dynamic loading
+  - `PostmarkProvider` with dynamic loading
+- Provider-specific features
   - Mailgun: EU region support, custom headers
   - Resend: Tags and custom headers
   - Postmark: Message streams and tags
-- Updated MailManager to support 6 total providers
 
 ### Changed
-- Updated README with documentation for Mailgun, Resend, and Postmark
+
 - Updated package.json to version 0.3.0
-- Added form-data as peer dependency for Mailgun
-- Updated provider installation instructions
+- MailManager now supports 6 total providers
+- Added `form-data` as peer dependency for Mailgun
 
 ### Fixed
+
 - TypeScript strict mode compliance for new providers
-- ESLint warnings with proper annotations
 
 ## [0.2.0] - 2025-11-23
 
 ### Added
-- **Complete test suite** with 95%+ coverage (25 tests)
+
+- **Complete test suite** with 95%+ coverage
   - Unit tests for SmtpProvider (12 tests)
   - Unit tests for MailManager (13 tests)
   - MessageBuilder fluent API tests
 - Jest configuration excluding optional dependencies from coverage
-- Tests for provider factory pattern and caching
 
 ### Changed
-- Updated README with current feature status
-- PROGRESS.md now reflects Phase 2 completion
+
+- Updated package.json to version 0.2.0
+- 25 passing tests
 
 ## [0.1.0] - 2025-11-23
 
 ### Added
+
 - **Core email functionality**
-  - Mail facade with fluent API (`Mail.to().subject().send()`)
-  - MailManager with provider factory pattern
-  - MessageBuilder with chainable methods
-  
+  - `Mail` facade with fluent API (`Mail.to().subject().send()`)
+  - `MailManager` with provider factory pattern
+  - `MessageBuilder` with chainable methods
 - **Email providers** (3 total)
-  - SMTP provider via nodemailer ✅ Tested
-  - SendGrid provider via @sendgrid/mail
-  - AWS SES provider via @aws-sdk/client-ses
-  
+  - `SmtpProvider` via nodemailer
+  - `SendGridProvider` via @sendgrid/mail
+  - `SesProvider` via @aws-sdk/client-ses
 - **Features**
   - Multiple recipients (to, cc, bcc)
   - HTML and text content
-  - Email attachments (SMTP, SendGrid)
+  - Email attachments
   - Address formatting with names
   - Reply-to support
   - Custom headers
   - Error handling with graceful degradation
-  
-- **Type safety**
-  - Full TypeScript support
-  - Strict mode enabled
-  - Complete type definitions
-  
 - **Architecture**
   - Lightweight core (~25MB with SMTP only)
   - Optional providers as peerDependencies
   - Provider caching for performance
   - Dynamic provider loading
-  
-- **Documentation**
-  - README with examples for all providers
-  - Examples folder with working demos
-  - Installation guide for each provider
-  - CONTRIBUTING.md
-  
-- **Development**
-  - ESLint 9 with flat config
-  - Prettier formatting
-  - TypeScript 5.6.3
-  - Jest testing framework
-  - Build and lint scripts
-
-### Fixed
-- TypeScript strict mode compliance
-- ESLint warnings in provider implementations
-- Address formatting for MailAddress objects
+- Full TypeScript support with strict mode
 
 ## [0.0.1] - 2025-11-23
 
 ### Added
+
 - Initial project setup
 - Package structure
-- Git repository initialization
+- TypeScript 5.6 configuration
+- ESLint 9 with flat config
 - MIT License

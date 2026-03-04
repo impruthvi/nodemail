@@ -36,5 +36,11 @@ export type { SentMessage } from './testing';
 // Types
 export * from './types';
 
+// Config helper for TypeScript autocomplete
+import type { MailConfig } from './types';
+export function defineConfig(config: MailConfig): MailConfig {
+  return config;
+}
+
 // Version
-export const VERSION = '1.0.1';
+export const VERSION = '1.1.0';
