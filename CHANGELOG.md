@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.3] - 2026-03-05
+
+### Fixed
+
+- Fixed `queue:clear` CLI command to use `--status/-s` option instead of positional argument
+- CLI now matches documented usage: `npx nodemail queue:clear --status failed`
+
 ## [1.1.1] - 2026-03-04
 
 ### Fixed

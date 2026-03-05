@@ -41,7 +41,10 @@ program
 program
   .command('queue:clear')
   .description('Clear jobs by status')
-  .argument('<status>', 'Job status to clear (failed, completed, delayed, waiting)')
+  .requiredOption(
+    '-s, --status <status>',
+    'Job status to clear (failed, completed, delayed, waiting)'
+  )
   .option('-q, --queue <name>', 'Queue name', 'mail')
   .option('--config <path>', 'Path to config file')
   .action(queueClear);

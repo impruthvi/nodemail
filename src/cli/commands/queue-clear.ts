@@ -8,14 +8,17 @@ import { MailManager } from '../../core/MailManager.js';
 
 interface QueueClearOptions {
   queue: string;
+  status: string;
   config?: string;
 }
 
 const VALID_STATUSES = ['failed', 'completed', 'delayed', 'waiting'] as const;
 type JobStatus = (typeof VALID_STATUSES)[number];
 
-export async function queueClear(status: string, options: QueueClearOptions): Promise<void> {
+export async function queueClear(options: QueueClearOptions): Promise<void> {
   try {
+    const { status } = options;
+
     // Validate status
     if (!VALID_STATUSES.includes(status as JobStatus)) {
       await output.error(`Invalid status: ${status}`);
