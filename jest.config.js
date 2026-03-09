@@ -11,6 +11,7 @@ module.exports = {
     '!src/**/*.d.ts',
     '!src/types/**',
     '!src/cli/**',
+    '!src/postinstall.ts',
     '!src/providers/SendGridProvider.ts', // Optional dependency - needs @sendgrid/mail installed
     '!src/providers/SesProvider.ts', // Optional dependency - needs @aws-sdk/client-ses installed
     '!src/providers/MailgunProvider.ts', // Optional dependency - needs mailgun.js + form-data installed

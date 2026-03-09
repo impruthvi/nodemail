@@ -1049,6 +1049,17 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail) - bringing el
 - 📫 [GitHub Issues](https://github.com/impruthvi/nodemail/issues) - Bug reports and feature requests
 - 💬 [GitHub Discussions](https://github.com/impruthvi/nodemail/discussions) - Questions and community chat
 
+## 📦 Postinstall Message
+
+After installation, nodemail displays a short thank-you message in your terminal. To suppress it, set one of these environment variables:
+
+```bash
+# Disable the postinstall message
+NODEMAIL_NO_POSTINSTALL=1 npm install @impruthvi/nodemail
+
+# Also auto-suppressed in CI environments (CI, GITHUB_ACTIONS, TRAVIS, etc.)
+```
+
 ---
 
 **⭐ If you like this idea, please star the repo!** It helps gauge interest and motivates development.
