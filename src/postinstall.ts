@@ -41,11 +41,13 @@ async function loadChalk(): Promise<ChalkLike> {
   }
 }
 
-function openTTY(): ((msg: string) => void) | null {
+async function openTTY(): Promise<((msg: string) => void) | null> {
   try {
-    const fs = require('fs');
+    const fs = await import('fs');
     const fd = fs.openSync('/dev/tty', 'w');
-    return (msg: string) => fs.writeSync(fd, msg + '\n');
+    return (msg: string) => {
+      fs.writeSync(fd, msg + '\n');
+    };
   } catch {
     return null;
   }
@@ -55,7 +57,7 @@ async function main(): Promise<void> {
   if (shouldSkip()) return;
 
   // Try /dev/tty first (bypasses npm's stdio capture), fall back to stderr
-  const ttyLog = openTTY();
+  const ttyLog = await openTTY();
   const log = ttyLog ?? ((msg: string) => process.stderr.write(msg + '\n'));
 
   const chalk = await loadChalk();
