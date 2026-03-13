@@ -74,7 +74,21 @@ describe('Postinstall Script', () => {
         'npx',
         ['tsx', scriptPath],
         {
-          env: { ...process.env, CI: '', NODEMAIL_NO_POSTINSTALL: '', NODEMAIL_FORCE_STDERR: '1' },
+          env: {
+            ...process.env,
+            CI: '',
+            GITHUB_ACTIONS: '',
+            TRAVIS: '',
+            CIRCLECI: '',
+            JENKINS_URL: '',
+            GITLAB_CI: '',
+            TF_BUILD: '',
+            BUILDKITE: '',
+            CODEBUILD_BUILD_ID: '',
+            TEAMCITY_VERSION: '',
+            NODEMAIL_NO_POSTINSTALL: '',
+            NODEMAIL_FORCE_STDERR: '1',
+          },
           timeout: 15000,
         },
         (error, _stdout, stderr) => {
