@@ -74,7 +74,7 @@ describe('Postinstall Script', () => {
         'npx',
         ['tsx', scriptPath],
         {
-          env: { ...process.env, CI: '', NODEMAIL_NO_POSTINSTALL: '' },
+          env: { ...process.env, CI: '', NODEMAIL_NO_POSTINSTALL: '', NODEMAIL_FORCE_STDERR: '1' },
           timeout: 15000,
         },
         (error, _stdout, stderr) => {

@@ -57,7 +57,7 @@ async function main(): Promise<void> {
   if (shouldSkip()) return;
 
   // Try /dev/tty first (bypasses npm's stdio capture), fall back to stderr
-  const ttyLog = await openTTY();
+  const ttyLog = process.env['NODEMAIL_FORCE_STDERR'] ? null : await openTTY();
   const log = ttyLog ?? ((msg: string) => process.stderr.write(msg + '\n'));
 
   const chalk = await loadChalk();
