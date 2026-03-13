@@ -72,7 +72,7 @@ describe('Postinstall Script', () => {
     it('should show thank-you message when not in CI', (done) => {
       execFile(
         'npx',
-        ['ts-node', '--transpile-only', scriptPath],
+        ['tsx', scriptPath],
         {
           env: { ...process.env, CI: '', NODEMAIL_NO_POSTINSTALL: '' },
           timeout: 15000,
@@ -82,14 +82,14 @@ describe('Postinstall Script', () => {
           expect(stderr).toContain('Thank you for installing @impruthvi/nodemail!');
           expect(stderr).toContain('https://github.com/impruthvi/nodemail');
           done();
-        },
+        }
       );
     });
 
     it('should exit silently when CI=true is set', (done) => {
       execFile(
         'npx',
-        ['ts-node', '--transpile-only', scriptPath],
+        ['tsx', scriptPath],
         {
           env: { ...process.env, CI: 'true' },
           timeout: 15000,
@@ -98,14 +98,14 @@ describe('Postinstall Script', () => {
           expect(stdout).toBe('');
           expect(error).toBeNull();
           done();
-        },
+        }
       );
     });
 
     it('should exit silently when NODEMAIL_NO_POSTINSTALL is set', (done) => {
       execFile(
         'npx',
-        ['ts-node', '--transpile-only', scriptPath],
+        ['tsx', scriptPath],
         {
           env: { ...process.env, NODEMAIL_NO_POSTINSTALL: '1' },
           timeout: 15000,
@@ -114,7 +114,7 @@ describe('Postinstall Script', () => {
           expect(stdout).toBe('');
           expect(error).toBeNull();
           done();
-        },
+        }
       );
     });
   });
