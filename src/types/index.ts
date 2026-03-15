@@ -25,6 +25,7 @@ export interface MailConfig {
   markdown?: MarkdownConfig;
   failover?: FailoverConfig;
   rateLimit?: RateLimitConfig;
+  alwaysTo?: string;
 }
 
 export interface TemplateConfig {
@@ -36,7 +37,7 @@ export interface TemplateConfig {
 }
 
 export interface MailerConfig {
-  driver: 'smtp' | 'sendgrid' | 'ses' | 'mailgun' | 'resend' | 'postmark' | (string & {});
+  driver: 'smtp' | 'sendgrid' | 'ses' | 'mailgun' | 'resend' | 'postmark' | 'log' | (string & {});
   failover?: FailoverConfig;
   rateLimit?: RateLimitConfig;
   [key: string]: unknown;
@@ -84,6 +85,10 @@ export interface ResendConfig extends MailerConfig {
 export interface PostmarkConfig extends MailerConfig {
   driver: 'postmark';
   serverToken: string;
+}
+
+export interface LogConfig extends MailerConfig {
+  driver: 'log';
 }
 
 export interface MailAddress {

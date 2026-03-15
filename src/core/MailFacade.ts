@@ -8,7 +8,9 @@ import { MailManager } from './MailManager';
 import { MessageBuilder } from './MessageBuilder';
 import type {
   MailConfig,
+  MailerConfig,
   MailOptions,
+  MailProvider,
   MailResponse,
   PreviewResult,
   QueueJobResult,
@@ -177,6 +179,23 @@ class MailFacade {
     }
     mailable.setMailManager(this.getInstance());
     return this.getInstance().preview(options as MailOptions);
+  }
+
+  // ==================== Extension Methods ====================
+
+  /**
+   * Register a custom mail provider
+   */
+  static extend(driver: string, factory: (config: MailerConfig) => MailProvider): void {
+    MailManager.extend(driver, factory);
+  }
+
+  /**
+   * Set the alwaysTo redirect address (skipped in fake mode)
+   */
+  static alwaysTo(address: string | undefined): void {
+    if (this.isFaking()) return;
+    this.getInstance().setAlwaysTo(address);
   }
 
   // ==================== Testing Methods ====================

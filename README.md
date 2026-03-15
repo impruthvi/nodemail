@@ -30,6 +30,9 @@ await Mail.to('user@example.com').send(new WelcomeEmail(user));
 | Queue support | Bull / BullMQ | No | No | No |
 | Rate limiting | Sliding window | No | No | No |
 | Email events | Hooks | No | No | No |
+| Log transport | Built-in | No | No | No |
+| Custom providers | `Mail.extend()` | No | No | No |
+| Staging redirect | `Mail.alwaysTo()` | No | No | No |
 | CLI tools | 8 commands | No | No | No |
 | TypeScript | First-class | @types needed | Yes | Yes |
 
@@ -256,6 +259,63 @@ mailers: {
 ```
 
 When exceeded, returns `{ success: false }` — never throws.
+
+## Log Transport
+
+Use the `log` driver during development — emails are printed to console instead of sent:
+
+```typescript
+Mail.configure({
+  default: 'log',
+  from: { address: 'dev@example.com', name: 'Dev' },
+  mailers: {
+    log: { driver: 'log' },
+  },
+});
+
+await Mail.to('user@example.com').subject('Test').html('<p>Hi</p>').send();
+// Prints formatted email to console — no SMTP needed
+```
+
+## Custom Providers
+
+Register your own mail provider with `Mail.extend()`:
+
+```typescript
+import { Mail } from 'laramail';
+
+Mail.extend('custom-api', (config) => ({
+  async send(options) {
+    const res = await fetch('https://api.example.com/send', {
+      method: 'POST',
+      body: JSON.stringify(options),
+    });
+    return { success: res.ok, messageId: (await res.json()).id };
+  },
+}));
+
+Mail.configure({
+  default: 'api',
+  from: { address: 'noreply@example.com', name: 'App' },
+  mailers: { api: { driver: 'custom-api' } },
+});
+```
+
+## Staging Redirect (alwaysTo)
+
+Redirect all emails to a single address — perfect for staging environments:
+
+```typescript
+Mail.alwaysTo('dev-team@example.com');
+// All emails now go to dev-team@example.com, CC/BCC cleared
+// Call Mail.alwaysTo(undefined) to disable
+
+// Or via config:
+Mail.configure({
+  // ...
+  alwaysTo: 'dev-team@example.com',
+});
+```
 
 ## Email Preview
 

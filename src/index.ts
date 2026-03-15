@@ -18,6 +18,7 @@ export { SesProvider } from './providers/SesProvider';
 export { MailgunProvider } from './providers/MailgunProvider';
 export { ResendProvider } from './providers/ResendProvider';
 export { PostmarkProvider } from './providers/PostmarkProvider';
+export { LogProvider } from './providers/LogProvider';
 
 // Template Engines
 export type { TemplateEngine, TemplateEngineOptions } from './templates';

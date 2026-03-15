@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-03-15
+
+### Added
+
+- **Log Transport** — `LogProvider` for development: logs formatted email details to console instead of sending. Warns if used in production.
+- **Custom Providers** — `Mail.extend(driver, factory)` to register custom mail providers. Custom providers are checked before built-in drivers, allowing overrides.
+- **Always-To Redirect** — `Mail.alwaysTo(address)` redirects all emails to a single address, clearing CC/BCC. Perfect for staging environments. Also applies to `preview()`. Skipped in fake mode.
+- 35 new tests (645 total)
+
 ## [1.2.0] - 2026-03-15
 
 ### Changed

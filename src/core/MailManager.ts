@@ -27,6 +27,7 @@ import { SesProvider } from '../providers/SesProvider';
 import { MailgunProvider } from '../providers/MailgunProvider';
 import { ResendProvider } from '../providers/ResendProvider';
 import { PostmarkProvider } from '../providers/PostmarkProvider';
+import { LogProvider } from '../providers/LogProvider';
 import type { TemplateEngine, TemplateEngineOptions } from '../templates/TemplateEngine';
 import { HandlebarsEngine } from '../templates/HandlebarsEngine';
 import { EjsEngine } from '../templates/EjsEngine';
@@ -36,6 +37,16 @@ import { MarkdownRenderer } from '../markdown/MarkdownRenderer';
 import type { MarkdownRendererOptions } from '../markdown/MarkdownRenderer';
 
 export class MailManager {
+  private static customProviders = new Map<string, (config: MailerConfig) => MailProvider>();
+
+  static extend(driver: string, factory: (config: MailerConfig) => MailProvider): void {
+    MailManager.customProviders.set(driver, factory);
+  }
+
+  static clearCustomProviders(): void {
+    MailManager.customProviders.clear();
+  }
+
   private config: MailConfig;
   private providers: Map<string, MailProvider> = new Map();
   private templateEngine?: TemplateEngine;
@@ -160,6 +171,16 @@ export class MailManager {
    * Create a provider instance based on configuration
    */
   private createProvider(mailerConfig: MailerConfig): MailProvider {
+    // Check custom providers first
+    const customFactory = MailManager.customProviders.get(mailerConfig.driver);
+    if (customFactory) {
+      const provider = customFactory(mailerConfig);
+      if (!provider || typeof provider.send !== 'function') {
+        throw new Error(`Custom provider factory for "${mailerConfig.driver}" must return an object with a send() method`);
+      }
+      return provider;
+    }
+
     switch (mailerConfig.driver) {
       case 'smtp':
         return new SmtpProvider(mailerConfig as import('../types').SmtpConfig);
@@ -173,6 +194,8 @@ export class MailManager {
         return new ResendProvider(mailerConfig as import('../types').ResendConfig);
       case 'postmark':
         return new PostmarkProvider(mailerConfig as import('../types').PostmarkConfig);
+      case 'log':
+        return new LogProvider();
       default:
         throw new Error(`Unsupported mail driver: ${mailerConfig.driver}`);
     }
@@ -321,7 +344,14 @@ export class MailManager {
    * No events fired, no provider called
    */
   async preview(options: MailOptions): Promise<PreviewResult> {
-    const processed = await this.preprocess(options);
+    let processed = await this.preprocess(options);
+
+    // Apply alwaysTo redirect
+    if (this.config.alwaysTo) {
+      processed = { ...processed, to: this.config.alwaysTo };
+      delete processed.cc;
+      delete processed.bcc;
+    }
 
     // Merge default from if not set
     const from = processed.from || this.config.from;
@@ -344,6 +374,13 @@ export class MailManager {
    */
   async send(options: MailOptions): Promise<MailResponse> {
     options = await this.preprocess(options);
+
+    // Apply alwaysTo redirect
+    if (this.config.alwaysTo) {
+      options = { ...options, to: this.config.alwaysTo };
+      delete options.cc;
+      delete options.bcc;
+    }
 
     const mailerName = this.config.default;
 
@@ -432,6 +469,18 @@ export class MailManager {
     }
 
     return response;
+  }
+
+  /**
+   * Set the alwaysTo redirect address
+   */
+  setAlwaysTo(address: string | undefined): void {
+    if (address === undefined) {
+      const { alwaysTo: _, ...rest } = this.config;
+      this.config = rest as MailConfig;
+    } else {
+      this.config = { ...this.config, alwaysTo: address };
+    }
   }
 
   /**
