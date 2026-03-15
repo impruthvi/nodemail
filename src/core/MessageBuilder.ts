@@ -140,7 +140,7 @@ export class MessageBuilder {
       return this.manager.send(this.options as MailOptions);
     }
 
-    const realManager = this.manager as MailManager;
+    const realManager = this.manager;
 
     if (mailable) {
       mailable.setMailManager(realManager);
@@ -163,7 +163,7 @@ export class MessageBuilder {
       return this.manager.preview(this.options as MailOptions);
     }
 
-    const realManager = this.manager as MailManager;
+    const realManager = this.manager;
     return realManager.preview(this.options as MailOptions);
   }
 
@@ -184,7 +184,7 @@ export class MessageBuilder {
       return { success: true, jobId: `fake-${Date.now()}`, queue: 'mail' };
     }
 
-    const realManager = this.manager as MailManager;
+    const realManager = this.manager;
     const mailOptions = this.getMailOptions(mailable);
     return realManager.queue(mailOptions);
   }
@@ -210,7 +210,7 @@ export class MessageBuilder {
       return { success: true, jobId: `fake-${Date.now()}`, queue: 'mail' };
     }
 
-    const realManager = this.manager as MailManager;
+    const realManager = this.manager;
     const mailOptions = this.getMailOptions(mailable);
     return realManager.later(mailOptions, delaySeconds);
   }
@@ -236,7 +236,7 @@ export class MessageBuilder {
       return { success: true, jobId: `fake-${Date.now()}`, queue: 'mail' };
     }
 
-    const realManager = this.manager as MailManager;
+    const realManager = this.manager;
     const mailOptions = this.getMailOptions(mailable);
     return realManager.at(mailOptions, date);
   }
@@ -247,7 +247,7 @@ export class MessageBuilder {
   private getMailOptions(mailable?: Mailable): MailOptions {
     if (mailable) {
       if (!(this.manager instanceof MailFake)) {
-        mailable.setMailManager(this.manager as MailManager);
+        mailable.setMailManager(this.manager);
       }
       const mailOptions = mailable.getMailOptions();
       return {
