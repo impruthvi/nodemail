@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-03-15
+
+### Added
+
+- **README comparison table** — feature comparison vs nodemailer, @sendgrid/mail, and resend
+- **Unified `MessageBuilder`** — single fluent builder for both real and fake mode, exported as public API
+- **Custom driver support** — driver type now accepts custom strings via `(string & {})` for `Mail.extend()` readiness
+- **Auto-synced VERSION** — `VERSION` export now reads from `package.json` automatically, no more drift
+
+### Removed
+
+- **Postinstall script** — removed thank-you message on install (zero user value, was an attack surface)
+- **`MailtrapConfig` type** — removed dead type with no implementation
+
+### Changed
+
+- Merged `FakeableMessageBuilder` and `MessageBuilder` into a single `MessageBuilder` class (`src/core/MessageBuilder.ts`), eliminating ~170 lines of duplication
+- CLI `config:check` now accepts custom driver names without erroring (preparing for `Mail.extend()`)
+
 ## [1.1.3] - 2026-03-05
 
 ### Fixed

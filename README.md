@@ -20,6 +20,25 @@ A lightweight, developer-friendly email library where you can:
 
 Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 
+## How nodemail Compares
+
+| Feature | nodemail | nodemailer | @sendgrid/mail | resend |
+|---------|:--------:|:----------:|:--------------:|:------:|
+| Multi-provider support | 6 providers | SMTP only | SendGrid only | Resend only |
+| Switch provider via config | Yes | No | No | No |
+| Provider failover | Yes (auto chain) | No | No | No |
+| Mailable classes | Yes (Laravel-style) | No | No | No |
+| `Mail.fake()` testing | Yes | No | No | No |
+| Template engines | 3 (HBS, EJS, Pug) | No | Yes (limited) | No |
+| Markdown emails | Yes (components) | No | No | No |
+| Queue support | Bull / BullMQ | No | No | No |
+| Rate limiting | Yes (sliding window) | No | No | No |
+| Email events | Yes (hooks) | No | No | No |
+| TypeScript | First-class | @types needed | Yes | Yes |
+| CLI tools | 8 commands | No | No | No |
+| Email preview | Yes | No | No | No |
+| Fluent API | Full chain | Partial | Partial | Partial |
+
 ## ✨ Features
 
 ### ✅ Available Now (v1.1.0)
@@ -1048,17 +1067,6 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail) - bringing el
 - 📚 [Documentation](https://nodemail.impruthvi.me/) - Complete guides and API reference
 - 📫 [GitHub Issues](https://github.com/impruthvi/nodemail/issues) - Bug reports and feature requests
 - 💬 [GitHub Discussions](https://github.com/impruthvi/nodemail/discussions) - Questions and community chat
-
-## 📦 Postinstall Message
-
-After installation, nodemail displays a short thank-you message in your terminal. To suppress it, set one of these environment variables:
-
-```bash
-# Disable the postinstall message
-NODEMAIL_NO_POSTINSTALL=1 npm install @impruthvi/nodemail
-
-# Also auto-suppressed in CI environments (CI, GITHUB_ACTIONS, TRAVIS, etc.)
-```
 
 ---
 

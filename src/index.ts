@@ -5,6 +5,7 @@
 
 export { Mail } from './core/MailFacade';
 export { MailManager } from './core/MailManager';
+export { MessageBuilder } from './core/MessageBuilder';
 export { Mailable } from './core/Mailable';
 export { Message } from './core/Message';
 export { FailoverManager } from './core/FailoverManager';
@@ -42,5 +43,6 @@ export function defineConfig(config: MailConfig): MailConfig {
   return config;
 }
 
-// Version
-export const VERSION = '1.1.1';
+// Version — read from package.json to avoid drift
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+export const VERSION: string = (require('../package.json') as { version: string }).version;

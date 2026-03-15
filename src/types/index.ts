@@ -36,7 +36,7 @@ export interface TemplateConfig {
 }
 
 export interface MailerConfig {
-  driver: 'smtp' | 'sendgrid' | 'ses' | 'mailgun' | 'resend' | 'postmark' | 'mailtrap';
+  driver: 'smtp' | 'sendgrid' | 'ses' | 'mailgun' | 'resend' | 'postmark' | (string & {});
   failover?: FailoverConfig;
   rateLimit?: RateLimitConfig;
   [key: string]: unknown;
@@ -84,12 +84,6 @@ export interface ResendConfig extends MailerConfig {
 export interface PostmarkConfig extends MailerConfig {
   driver: 'postmark';
   serverToken: string;
-}
-
-export interface MailtrapConfig extends MailerConfig {
-  driver: 'mailtrap';
-  token: string;
-  inboxId: string;
 }
 
 export interface MailAddress {

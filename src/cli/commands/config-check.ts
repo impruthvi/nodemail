@@ -187,12 +187,9 @@ function validateMailerConfig(_name: string, config: Record<string, unknown>): s
     case 'postmark':
       if (!config['serverToken']) errors.push('Missing "serverToken" field');
       break;
-    case 'mailtrap':
-      if (!config['token']) errors.push('Missing "token" field');
-      if (!config['inboxId']) errors.push('Missing "inboxId" field');
-      break;
     default:
-      errors.push(`Unknown driver: ${driver}`);
+      // Custom drivers registered via Mail.extend() are valid
+      break;
   }
 
   return errors;

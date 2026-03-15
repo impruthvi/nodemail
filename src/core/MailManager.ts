@@ -3,14 +3,12 @@
  * Manages multiple mail configurations (SMTP, SendGrid, etc.)
  */
 
-import * as path from 'path';
 import type {
   MailConfig,
   MailOptions,
   MailProvider,
   MailResponse,
   MailerConfig,
-  Attachment,
   QueueJobResult,
   PreviewResult,
   SendingEvent,
@@ -20,6 +18,7 @@ import type {
   SentListener,
   SendFailedListener,
 } from '../types';
+import { MessageBuilder } from './MessageBuilder';
 import { FailoverManager } from './FailoverManager';
 import { RateLimiter } from './RateLimiter';
 import { SmtpProvider } from '../providers/SmtpProvider';
@@ -502,179 +501,3 @@ export class MailManager {
   }
 }
 
-/**
- * Message Builder - Fluent interface for building emails
- */
-export class MessageBuilder {
-  public options: Partial<MailOptions> = {};
-
-  private static readonly MIME_TYPES: Record<string, string> = {
-    png: 'image/png',
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    gif: 'image/gif',
-    svg: 'image/svg+xml',
-    webp: 'image/webp',
-    bmp: 'image/bmp',
-    ico: 'image/x-icon',
-  };
-
-  constructor(
-    private manager: MailManager,
-    to: string | string[]
-  ) {
-    this.options.to = to;
-  }
-
-  subject(subject: string) {
-    this.options.subject = subject;
-    return this;
-  }
-
-  html(html: string) {
-    this.options.html = html;
-    return this;
-  }
-
-  text(text: string) {
-    this.options.text = text;
-    return this;
-  }
-
-  from(from: string) {
-    this.options.from = from;
-    return this;
-  }
-
-  cc(cc: string | string[]) {
-    this.options.cc = cc;
-    return this;
-  }
-
-  bcc(bcc: string | string[]) {
-    this.options.bcc = bcc;
-    return this;
-  }
-
-  replyTo(replyTo: string) {
-    this.options.replyTo = replyTo;
-    return this;
-  }
-
-  attachments(attachments: Attachment[]) {
-    this.options.attachments = attachments;
-    return this;
-  }
-
-  headers(headers: Record<string, string>) {
-    this.options.headers = headers;
-    return this;
-  }
-
-  template(template: string) {
-    this.options.template = template;
-    return this;
-  }
-
-  data(data: Record<string, unknown>) {
-    this.options.data = data;
-    return this;
-  }
-
-  embedImage(filePath: string, cid: string, filename?: string) {
-    if (!this.options.attachments) {
-      this.options.attachments = [];
-    }
-    const ext = path.extname(filePath).slice(1).toLowerCase();
-    this.options.attachments.push({
-      filename: filename || path.basename(filePath),
-      path: filePath,
-      cid,
-      contentType: MessageBuilder.MIME_TYPES[ext] || 'application/octet-stream',
-    });
-    return this;
-  }
-
-  embedImageData(content: Buffer | string, cid: string, contentType: string, filename?: string) {
-    if (!this.options.attachments) {
-      this.options.attachments = [];
-    }
-    this.options.attachments.push({
-      filename: filename || `${cid}.${contentType.split('/')[1] || 'bin'}`,
-      content,
-      cid,
-      contentType,
-    });
-    return this;
-  }
-
-  priority(level: 'high' | 'normal' | 'low') {
-    this.options.priority = level;
-    return this;
-  }
-
-  async send(mailable?: import('./Mailable').Mailable): Promise<MailResponse> {
-    // If a Mailable instance is provided, use it
-    if (mailable) {
-      mailable.setMailManager(this.manager);
-      const mailOptions = mailable.getMailOptions();
-
-      // Merge the recipient from builder with mailable options
-      return this.manager.send({
-        ...mailOptions,
-        to: this.options.to!,
-      } as MailOptions);
-    }
-
-    // Otherwise, use the built options
-    if (!this.options.subject) {
-      throw new Error('Email subject is required');
-    }
-
-    return this.manager.send(this.options as MailOptions);
-  }
-
-  /**
-   * Queue the email for background sending
-   */
-  async queue(mailable?: import('./Mailable').Mailable): Promise<QueueJobResult> {
-    const mailOptions = this.getMailOptions(mailable);
-    return this.manager.queue(mailOptions);
-  }
-
-  /**
-   * Queue the email with a delay (in seconds)
-   */
-  async later(delaySeconds: number, mailable?: import('./Mailable').Mailable): Promise<QueueJobResult> {
-    const mailOptions = this.getMailOptions(mailable);
-    return this.manager.later(mailOptions, delaySeconds);
-  }
-
-  /**
-   * Schedule the email for a specific time
-   */
-  async at(date: Date, mailable?: import('./Mailable').Mailable): Promise<QueueJobResult> {
-    const mailOptions = this.getMailOptions(mailable);
-    return this.manager.at(mailOptions, date);
-  }
-
-  /**
-   * Get mail options from builder or mailable
-   */
-  private getMailOptions(mailable?: import('./Mailable').Mailable): MailOptions {
-    if (mailable) {
-      mailable.setMailManager(this.manager);
-      const mailOptions = mailable.getMailOptions();
-      return {
-        ...mailOptions,
-        to: this.options.to!,
-      } as MailOptions;
-    }
-
-    if (!this.options.subject) {
-      throw new Error('Email subject is required');
-    }
-
-    return this.options as MailOptions;
-  }
-}
