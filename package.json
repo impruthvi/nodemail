@@ -25,6 +25,7 @@
     "email",
     "mail",
     "mailer",
+    "laramail",
     "smtp",
     "sendgrid",
     "ses",
@@ -43,12 +44,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/impruthvi/nodemail.git"
+    "url": "git+https://github.com/impruthvi/laramail.git"
   },
   "bugs": {
-    "url": "https://github.com/impruthvi/nodemail/issues"
+    "url": "https://github.com/impruthvi/laramail/issues"
   },
-  "homepage": "https://github.com/impruthvi/nodemail#readme",
+  "homepage": "https://github.com/impruthvi/laramail#readme",
   "engines": {
     "node": ">=18.0.0"
   },

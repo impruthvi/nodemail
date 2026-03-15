@@ -3,9 +3,9 @@
 [![npm version](https://badge.fury.io/js/laramail.svg)](https://www.npmjs.com/package/laramail)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnodemail.impruthvi.me%2Fstats.json&query=%24.tests&label=tests&suffix=%20passing&color=brightgreen)](https://github.com/impruthvi/nodemail)
-[![Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnodemail.impruthvi.me%2Fstats.json&query=%24.coverage&label=coverage&suffix=%25&color=brightgreen)](https://github.com/impruthvi/nodemail)
-[![Documentation](https://img.shields.io/badge/docs-nodemail.impruthvi.me-blue)](https://nodemail.impruthvi.me/)
+[![Tests](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnodemail.impruthvi.me%2Fstats.json&query=%24.tests&label=tests&suffix=%20passing&color=brightgreen)](https://github.com/impruthvi/laramail)
+[![Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnodemail.impruthvi.me%2Fstats.json&query=%24.coverage&label=coverage&suffix=%25&color=brightgreen)](https://github.com/impruthvi/laramail)
+[![Documentation](https://img.shields.io/badge/docs-laramail-blue)](https://nodemail.impruthvi.me/)
 
 **laramail** brings the simplicity and elegance of Laravel's Mail system to the Node.js ecosystem with full TypeScript support.
 
@@ -1004,8 +1004,8 @@ This project is in early development. Contributions, ideas, and feedback are wel
 
 ```bash
 # Clone the repository
-git clone https://github.com/impruthvi/nodemail.git
-cd nodemail
+git clone https://github.com/impruthvi/laramail.git
+cd laramail
 
 # Install dependencies
 npm install
@@ -1065,8 +1065,8 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail) - bringing el
 ## 📞 Support & Community
 
 - 📚 [Documentation](https://nodemail.impruthvi.me/) - Complete guides and API reference
-- 📫 [GitHub Issues](https://github.com/impruthvi/nodemail/issues) - Bug reports and feature requests
-- 💬 [GitHub Discussions](https://github.com/impruthvi/nodemail/discussions) - Questions and community chat
+- 📫 [GitHub Issues](https://github.com/impruthvi/laramail/issues) - Bug reports and feature requests
+- 💬 [GitHub Discussions](https://github.com/impruthvi/laramail/discussions) - Questions and community chat
 
 ---
 

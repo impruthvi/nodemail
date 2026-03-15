@@ -10,7 +10,7 @@ laramail is in early development (Phase 1 complete, Phase 2 in progress). We wel
 
 ### Reporting Bugs
 
-- Use the [GitHub Issues](https://github.com/impruthvi/nodemail/issues) page
+- Use the [GitHub Issues](https://github.com/impruthvi/laramail/issues) page
 - Check if the issue already exists
 - Include as much detail as possible:
   - Node.js version
@@ -20,7 +20,7 @@ laramail is in early development (Phase 1 complete, Phase 2 in progress). We wel
 
 ### Suggesting Features
 
-- Open a [GitHub Discussion](https://github.com/impruthvi/nodemail/discussions)
+- Open a [GitHub Discussion](https://github.com/impruthvi/laramail/discussions)
 - Explain the use case
 - Provide examples if possible
 
@@ -113,7 +113,7 @@ laramail/
 
 ## ❓ Questions?
 
-- Open a [GitHub Discussion](https://github.com/impruthvi/nodemail/discussions)
+- Open a [GitHub Discussion](https://github.com/impruthvi/laramail/discussions)
 - Comment on existing issues
 
 ## 📜 Code of Conduct

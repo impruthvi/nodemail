@@ -94,7 +94,7 @@ function generateTestEmailHtml(to: string, mailer: string): string {
     </div>
     
     <div class="footer">
-      <p>Sent by <a href="https://github.com/impruthvi/nodemail">laramail</a></p>
+      <p>Sent by <a href="https://github.com/impruthvi/laramail">laramail</a></p>
     </div>
   </div>
 </body>

@@ -71,7 +71,7 @@ jobs:
           name: stats
           path: public/stats.json
 
-  # Push stats.json directly to nodemail-docs repo
+  # Push stats.json directly to docs repo
   push-stats-to-docs:
     needs: test
     runs-on: ubuntu-latest
