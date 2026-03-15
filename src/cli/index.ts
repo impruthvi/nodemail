@@ -20,7 +20,7 @@ program
   .description(
     'CLI tools for laramail - queue management, email preview, and development utilities'
   )
-  .version('1.1.0');
+  .version('1.2.0');
 
 // Queue commands
 program

@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.0] - 2026-03-15
 
+### Changed
+
+- **Package renamed** from `@impruthvi/nodemail` to `laramail`
+- CLI command changed from `npx nodemail` to `npx laramail`
+- Config file pattern changed from `nodemail.config.*` to `laramail.config.*`
+- Queue prefix default changed from `nodemail` to `laramail`
+- README restructured (1076 → 368 lines)
+
 ### Added
 
 - **README comparison table** — feature comparison vs nodemailer, @sendgrid/mail, and resend
