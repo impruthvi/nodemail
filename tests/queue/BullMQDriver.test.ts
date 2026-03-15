@@ -29,7 +29,7 @@ describe('BullMQDriver', () => {
     config = {
       driver: 'bullmq',
       defaultQueue: 'mail',
-      prefix: 'nodemail',
+      prefix: 'laramail',
       retries: 3,
       backoff: { type: 'exponential', delay: 1000 },
       connection: { host: 'localhost', port: 6379 },
@@ -162,7 +162,7 @@ describe('BullMQDriver', () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(MockWorkerConstructor).toHaveBeenCalledWith(
-        'nodemail_mail',
+        'laramail_mail',
         expect.any(Function),
         expect.objectContaining({ concurrency: 5 })
       );

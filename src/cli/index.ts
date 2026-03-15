@@ -16,9 +16,9 @@ import { configCheck } from './commands/config-check.js';
 const program = new Command();
 
 program
-  .name('nodemail')
+  .name('laramail')
   .description(
-    'CLI tools for @impruthvi/nodemail - queue management, email preview, and development utilities'
+    'CLI tools for laramail - queue management, email preview, and development utilities'
   )
   .version('1.1.0');
 
@@ -69,7 +69,7 @@ program
   .command('send:test')
   .description('Send a test email to verify configuration')
   .requiredOption('--to <email>', 'Recipient email address')
-  .option('-s, --subject <text>', 'Email subject', 'Nodemail Test Email')
+  .option('-s, --subject <text>', 'Email subject', 'Laramail Test Email')
   .option('-f, --from <email>', 'Sender email address')
   .option('--config <path>', 'Path to config file')
   .action(sendTest);

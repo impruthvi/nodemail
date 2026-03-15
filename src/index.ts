@@ -1,5 +1,5 @@
 /**
- * Main entry point for nodemail package
+ * Main entry point for laramail package
  * Exports all public APIs
  */
 

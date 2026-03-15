@@ -1,5 +1,5 @@
 /**
- * Testing utilities for nodemail
+ * Testing utilities for laramail
  * Provides Mail::fake() functionality for testing
  */
 

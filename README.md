@@ -1,13 +1,13 @@
-# @impruthvi/nodemail
+# laramail
 
-[![npm version](https://badge.fury.io/js/@impruthvi%2Fnodemail.svg)](https://www.npmjs.com/package/@impruthvi/nodemail)
+[![npm version](https://badge.fury.io/js/laramail.svg)](https://www.npmjs.com/package/laramail)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
 [![Tests](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnodemail.impruthvi.me%2Fstats.json&query=%24.tests&label=tests&suffix=%20passing&color=brightgreen)](https://github.com/impruthvi/nodemail)
 [![Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnodemail.impruthvi.me%2Fstats.json&query=%24.coverage&label=coverage&suffix=%25&color=brightgreen)](https://github.com/impruthvi/nodemail)
 [![Documentation](https://img.shields.io/badge/docs-nodemail.impruthvi.me-blue)](https://nodemail.impruthvi.me/)
 
-**@impruthvi/nodemail** brings the simplicity and elegance of Laravel's Mail system to the Node.js ecosystem with full TypeScript support.
+**laramail** brings the simplicity and elegance of Laravel's Mail system to the Node.js ecosystem with full TypeScript support.
 
 ## 🎯 Vision
 
@@ -20,9 +20,9 @@ A lightweight, developer-friendly email library where you can:
 
 Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 
-## How nodemail Compares
+## How laramail Compares
 
-| Feature | nodemail | nodemailer | @sendgrid/mail | resend |
+| Feature | laramail | nodemailer | @sendgrid/mail | resend |
 |---------|:--------:|:----------:|:--------------:|:------:|
 | Multi-provider support | 6 providers | SMTP only | SendGrid only | Resend only |
 | Switch provider via config | Yes | No | No | No |
@@ -69,13 +69,13 @@ Inspired by [Laravel's Mail system](https://laravel.com/docs/mail).
 ## 📦 Installation
 
 ```bash
-npm install @impruthvi/nodemail
+npm install laramail
 ```
 
 Or install a specific version:
 
 ```bash
-npm install @impruthvi/nodemail@1.1.0
+npm install laramail@1.1.0
 ```
 
 **Lightweight by default!** Only includes SMTP support (~25MB).
@@ -127,7 +127,7 @@ npm install marked juice
 ### SMTP (Nodemailer)
 
 ```typescript
-import { Mail } from 'nodemail';
+import { Mail } from 'laramail';
 
 Mail.configure({
   default: 'smtp',
@@ -156,7 +156,7 @@ await Mail.to('user@example.com').subject('Welcome!').html('<h1>Hello World!</h1
 
 ```typescript
 // npm install @sendgrid/mail
-import { Mail } from '@impruthvi/nodemail';
+import { Mail } from 'laramail';
 
 Mail.configure({
   default: 'sendgrid',
@@ -174,7 +174,7 @@ Mail.configure({
 
 ```typescript
 // npm install @aws-sdk/client-ses
-import { Mail } from '@impruthvi/nodemail';
+import { Mail } from 'laramail';
 
 Mail.configure({
   default: 'ses',
@@ -194,7 +194,7 @@ Mail.configure({
 
 ```typescript
 // npm install mailgun.js form-data
-import { Mail } from '@impruthvi/nodemail';
+import { Mail } from 'laramail';
 
 Mail.configure({
   default: 'mailgun',
@@ -214,7 +214,7 @@ Mail.configure({
 
 ```typescript
 // npm install resend
-import { Mail } from '@impruthvi/nodemail';
+import { Mail } from 'laramail';
 
 Mail.configure({
   default: 'resend',
@@ -232,7 +232,7 @@ Mail.configure({
 
 ```typescript
 // npm install postmark
-import { Mail } from '@impruthvi/nodemail';
+import { Mail } from 'laramail';
 
 Mail.configure({
   default: 'postmark',
@@ -252,7 +252,7 @@ Mail.configure({
 
 ```typescript
 // npm install handlebars
-import { Mail } from '@impruthvi/nodemail';
+import { Mail } from 'laramail';
 
 Mail.configure({
   default: 'smtp',
@@ -328,7 +328,7 @@ Write beautiful emails in Markdown with built-in components. Requires `npm insta
 ### MarkdownMailable
 
 ```typescript
-import { MarkdownMailable, Mail } from '@impruthvi/nodemail';
+import { MarkdownMailable, Mail } from 'laramail';
 
 class WelcomeEmail extends MarkdownMailable {
   constructor(
@@ -454,30 +454,30 @@ The CLI provides commands for queue management, email preview, code generation, 
 
 ```bash
 # Queue management
-npx nodemail queue:work              # Start processing queued emails
-npx nodemail queue:status            # Show queue job counts
-npx nodemail queue:clear --status failed   # Clear failed jobs
-npx nodemail queue:retry             # Retry failed jobs
+npx laramail queue:work              # Start processing queued emails
+npx laramail queue:status            # Show queue job counts
+npx laramail queue:clear --status failed   # Clear failed jobs
+npx laramail queue:retry             # Retry failed jobs
 
 # Email preview and testing
-npx nodemail preview --mailable ./src/mail/WelcomeEmail.ts
-npx nodemail send:test --to you@example.com
+npx laramail preview --mailable ./src/mail/WelcomeEmail.ts
+npx laramail send:test --to you@example.com
 
 # Code generation
-npx nodemail make:mailable WelcomeEmail
-npx nodemail make:mailable NewsletterEmail --markdown
+npx laramail make:mailable WelcomeEmail
+npx laramail make:mailable NewsletterEmail --markdown
 
 # Configuration
-npx nodemail config:check            # Validate configuration
-npx nodemail config:check --test     # Validate and test connections
+npx laramail config:check            # Validate configuration
+npx laramail config:check --test     # Validate and test connections
 ```
 
 ### Configuration File
 
-Create a `nodemail.config.ts` in your project root:
+Create a `laramail.config.ts` in your project root:
 
 ```typescript
-import { defineConfig } from '@impruthvi/nodemail';
+import { defineConfig } from 'laramail';
 
 export default defineConfig({
   default: 'smtp',
@@ -745,7 +745,7 @@ await Mail.to('user@example.com')
 Create reusable email classes with Laravel-like syntax:
 
 ```typescript
-import { Mailable } from '@impruthvi/nodemail';
+import { Mailable } from 'laramail';
 
 class WelcomeEmail extends Mailable {
   constructor(
@@ -776,7 +776,7 @@ await new WelcomeEmail(user, 'My App').to('user@example.com').send();
 Test your emails without actually sending them - just like Laravel's `Mail::fake()`:
 
 ```typescript
-import { Mail, Mailable } from '@impruthvi/nodemail';
+import { Mail, Mailable } from 'laramail';
 
 // Your Mailable class
 class WelcomeEmail extends Mailable {
@@ -982,7 +982,7 @@ sent.getHtml(); // Get HTML content
 - ✅ `make:mailable` - Generate Mailable class (with markdown/template options)
 - ✅ `config:check` - Validate configuration with optional connection testing
 - ✅ `defineConfig` helper for TypeScript autocomplete in config files
-- ✅ Auto-detection of nodemail.config.ts/js config files
+- ✅ Auto-detection of laramail.config.ts/js config files
 
 **Phase 10+** 🚧 Coming Soon
 
@@ -1020,7 +1020,7 @@ npm run lint
 npm run format
 ```
 
-## 💡 Why nodemail?
+## 💡 Why laramail?
 
 ### Inspired by Laravel, Built for Node.js
 
@@ -1031,10 +1031,10 @@ If you've used Laravel's Mail system, you know how elegant it is:
 Mail::to($user->email)->send(new WelcomeEmail($user));
 ```
 
-**@impruthvi/nodemail** brings this same elegance to Node.js/TypeScript:
+**laramail** brings this same elegance to Node.js/TypeScript:
 
 ```typescript
-// @impruthvi/nodemail (TypeScript)
+// laramail (TypeScript)
 await Mail.to(user.email).send(new WelcomeEmail(user));
 ```
 

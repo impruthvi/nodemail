@@ -20,7 +20,7 @@ export async function configCheck(options: ConfigCheckOptions): Promise<void> {
     if (!configPath) {
       await output.error('No configuration file found');
       await output.info(
-        'Create a nodemail.config.ts or nodemail.config.js file in your project root'
+        'Create a laramail.config.ts or laramail.config.js file in your project root'
       );
       process.exit(1);
     }
@@ -117,7 +117,7 @@ export async function configCheck(options: ConfigCheckOptions): Promise<void> {
     output.newline();
 
     if (hasErrors) {
-      await output.error('Configuration has errors. Please fix them before using nodemail.');
+      await output.error('Configuration has errors. Please fix them before using laramail.');
       process.exit(1);
     }
 

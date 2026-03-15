@@ -10,8 +10,8 @@ async function main() {
 
     const response = await Mail.to('recipient@example.com')
       .subject('Test Email from Postmark Provider')
-      .html('<h1>Hello from Postmark!</h1><p>This email was sent using @impruthvi/nodemail with Postmark.</p>')
-      .text('Hello from Postmark! This email was sent using @impruthvi/nodemail with Postmark.')
+      .html('<h1>Hello from Postmark!</h1><p>This email was sent using laramail with Postmark.</p>')
+      .text('Hello from Postmark! This email was sent using laramail with Postmark.')
       .send();
 
     console.log('✅ Email sent successfully!');

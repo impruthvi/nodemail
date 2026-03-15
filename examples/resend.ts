@@ -10,8 +10,8 @@ async function main() {
 
     const response = await Mail.to('recipient@example.com')
       .subject('Test Email from Resend Provider')
-      .html('<h1>Hello from Resend!</h1><p>This email was sent using @impruthvi/nodemail with Resend.</p>')
-      .text('Hello from Resend! This email was sent using @impruthvi/nodemail with Resend.')
+      .html('<h1>Hello from Resend!</h1><p>This email was sent using laramail with Resend.</p>')
+      .text('Hello from Resend! This email was sent using laramail with Resend.')
       .send();
 
     console.log('✅ Email sent successfully!');

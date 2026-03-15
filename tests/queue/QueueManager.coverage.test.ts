@@ -191,7 +191,7 @@ describe('QueueManager - Coverage Tests', () => {
       const manager = new QueueManager(config);
       const actualConfig = manager.getConfig();
 
-      expect(actualConfig.prefix).toBe('nodemail');
+      expect(actualConfig.prefix).toBe('laramail');
     });
 
     it('should use custom prefix', () => {

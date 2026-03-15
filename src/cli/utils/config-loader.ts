@@ -1,5 +1,5 @@
 /**
- * Config Loader - Auto-detect and load nodemail.config.ts/js
+ * Config Loader - Auto-detect and load laramail.config.ts/js
  */
 
 import * as fs from 'fs';
@@ -13,10 +13,10 @@ export interface LoadedConfig {
 }
 
 const CONFIG_FILES = [
-  'nodemail.config.ts',
-  'nodemail.config.js',
-  'nodemail.config.mjs',
-  'nodemail.config.cjs',
+  'laramail.config.ts',
+  'laramail.config.js',
+  'laramail.config.mjs',
+  'laramail.config.cjs',
 ];
 
 /**
@@ -57,7 +57,7 @@ export async function loadConfig(customPath?: string): Promise<LoadedConfig> {
     const searchedFiles = customPath ? [customPath] : CONFIG_FILES;
     throw new Error(
       `Config file not found. Searched for: ${searchedFiles.join(', ')}\n` +
-        'Create a nodemail.config.ts or nodemail.config.js file in your project root.'
+        'Create a laramail.config.ts or laramail.config.js file in your project root.'
     );
   }
 
@@ -98,7 +98,7 @@ export async function loadConfig(customPath?: string): Promise<LoadedConfig> {
 
     throw new Error(
       `Failed to load config from ${configPath}: ${error instanceof Error ? error.message : String(error)}\n` +
-        'For TypeScript configs, make sure to run the CLI with tsx: npx tsx node_modules/.bin/nodemail'
+        'For TypeScript configs, make sure to run the CLI with tsx: npx tsx node_modules/.bin/laramail'
     );
   }
 }

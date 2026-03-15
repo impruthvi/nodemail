@@ -23,7 +23,7 @@ export class QueueManager {
     this.config = {
       driver: config.driver || 'sync',
       defaultQueue: config.defaultQueue || 'mail',
-      prefix: config.prefix || 'nodemail',
+      prefix: config.prefix || 'laramail',
       retries: config.retries ?? 3,
       backoff: config.backoff || { type: 'exponential', delay: 1000 },
       connection: config.connection || { host: 'localhost', port: 6379 },

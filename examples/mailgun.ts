@@ -10,8 +10,8 @@ async function main() {
 
     const response = await Mail.to('recipient@example.com')
       .subject('Test Email from Mailgun Provider')
-      .html('<h1>Hello from Mailgun!</h1><p>This email was sent using @impruthvi/nodemail with Mailgun.</p>')
-      .text('Hello from Mailgun! This email was sent using @impruthvi/nodemail with Mailgun.')
+      .html('<h1>Hello from Mailgun!</h1><p>This email was sent using laramail with Mailgun.</p>')
+      .text('Hello from Mailgun! This email was sent using laramail with Mailgun.')
       .cc('cc@example.com')
       .send();
 

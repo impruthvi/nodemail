@@ -1,10 +1,10 @@
-# Contributing to nodemail
+# Contributing to laramail
 
-First off, thank you for considering contributing to nodemail! 🎉
+First off, thank you for considering contributing to laramail! 🎉
 
 ## 🚧 Project Status
 
-nodemail is in early development (Phase 1 complete, Phase 2 in progress). We welcome contributions of all kinds!
+laramail is in early development (Phase 1 complete, Phase 2 in progress). We welcome contributions of all kinds!
 
 ## 🤝 How to Contribute
 
@@ -64,8 +64,8 @@ nodemail is in early development (Phase 1 complete, Phase 2 in progress). We wel
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/nodemail.git
-cd nodemail
+git clone https://github.com/YOUR_USERNAME/laramail.git
+cd laramail
 
 # Install dependencies
 npm install
@@ -100,7 +100,7 @@ npm run format
 ## 📖 Project Structure
 
 ```
-nodemail/
+laramail/
 ├── src/
 │   ├── core/          # Core functionality
 │   ├── providers/     # Email provider implementations
@@ -124,4 +124,4 @@ nodemail/
 
 ## 🙏 Thank You!
 
-Every contribution, no matter how small, is valuable. Thank you for helping make nodemail better!
+Every contribution, no matter how small, is valuable. Thank you for helping make laramail better!

@@ -1,5 +1,5 @@
 /**
- * Type definitions for nodemail
+ * Type definitions for laramail
  */
 
 import type { TemplateEngine } from '../templates/TemplateEngine';

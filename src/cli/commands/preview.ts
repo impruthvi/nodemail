@@ -98,7 +98,7 @@ export async function preview(mailablePath: string, options: PreviewOptions): Pr
       to: previewResult.to,
       headers: previewResult.headers,
     });
-    const tempFile = path.join(os.tmpdir(), `nodemail-preview-${Date.now()}.html`);
+    const tempFile = path.join(os.tmpdir(), `laramail-preview-${Date.now()}.html`);
     fs.writeFileSync(tempFile, html);
 
     await output.success(`Preview generated: ${tempFile}`);

@@ -32,7 +32,7 @@ export async function sendTest(options: SendTestOptions): Promise<void> {
       subject: options.subject,
       from: typeof from === 'string' ? from : `${from.name} <${from.address}>`,
       html,
-      text: `This is a test email from Nodemail CLI.\n\nSent to: ${options.to}\nMailer: ${config.default}\nTimestamp: ${new Date().toISOString()}`,
+      text: `This is a test email from Laramail CLI.\n\nSent to: ${options.to}\nMailer: ${config.default}\nTimestamp: ${new Date().toISOString()}`,
     });
 
     if (result.success) {
@@ -73,10 +73,10 @@ function generateTestEmailHtml(to: string, mailer: string): string {
 <body>
   <div class="header">
     <div class="success">✓</div>
-    <h1>Nodemail Test Email</h1>
+    <h1>Laramail Test Email</h1>
   </div>
   <div class="content">
-    <p>Your email configuration is working correctly! This test email was sent using the Nodemail CLI.</p>
+    <p>Your email configuration is working correctly! This test email was sent using the Laramail CLI.</p>
     
     <div class="details">
       <div class="detail-row">
@@ -94,7 +94,7 @@ function generateTestEmailHtml(to: string, mailer: string): string {
     </div>
     
     <div class="footer">
-      <p>Sent by <a href="https://github.com/impruthvi/nodemail">@impruthvi/nodemail</a></p>
+      <p>Sent by <a href="https://github.com/impruthvi/nodemail">laramail</a></p>
     </div>
   </div>
 </body>

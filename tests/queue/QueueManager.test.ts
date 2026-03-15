@@ -44,7 +44,7 @@ describe('QueueManager', () => {
 
       expect(config.driver).toBe('sync');
       expect(config.defaultQueue).toBe('mail');
-      expect(config.prefix).toBe('nodemail');
+      expect(config.prefix).toBe('laramail');
       expect(config.retries).toBe(3);
     });
 

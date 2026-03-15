@@ -62,7 +62,7 @@ function generateMailableTemplate(name: string): string {
  * ${name} - Email notification
  */
 
-import { Mailable } from '@impruthvi/nodemail';
+import { Mailable } from 'laramail';
 
 interface ${name}Data {
   name: string;
@@ -91,7 +91,7 @@ function generateMarkdownMailableTemplate(name: string): string {
  * ${name} - Markdown email notification
  */
 
-import { MarkdownMailable } from '@impruthvi/nodemail';
+import { MarkdownMailable } from 'laramail';
 
 interface ${name}Data {
   name: string;

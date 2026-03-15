@@ -27,7 +27,7 @@ describe('BullDriver', () => {
     config = {
       driver: 'bull',
       defaultQueue: 'mail',
-      prefix: 'nodemail',
+      prefix: 'laramail',
       retries: 3,
       backoff: { type: 'exponential', delay: 1000 },
       connection: { host: 'localhost', port: 6379 },
@@ -303,7 +303,7 @@ describe('BullDriver', () => {
       const noConnConfig: QueueConfig = {
         driver: 'bull',
         defaultQueue: 'mail',
-        prefix: 'nodemail',
+        prefix: 'laramail',
       };
       const d = new BullDriver(noConnConfig);
       (d as any).Bull = MockBullConstructor;
