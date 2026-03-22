@@ -1,36 +1,32 @@
 /**
  * SendGrid provider tests
+ *
+ * Uses beforeEach resetModules + doMock to avoid module cache
+ * contamination when running with the full test suite in CI.
  */
 
 const mockSetApiKey = jest.fn();
 const mockSend = jest.fn();
 
-function loadSendGridProvider() {
-  let SendGridProvider: typeof import('../../src/providers/SendGridProvider').SendGridProvider;
-  jest.isolateModules(() => {
-    jest.doMock('@sendgrid/mail', () => ({
-      setApiKey: mockSetApiKey,
-      send: mockSend,
-    }), { virtual: true });
-    SendGridProvider = require('../../src/providers/SendGridProvider').SendGridProvider;
-  });
-  return SendGridProvider!;
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let SendGridProvider: any;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  jest.resetModules();
+  jest.doMock('@sendgrid/mail', () => ({
+    setApiKey: mockSetApiKey,
+    send: mockSend,
+  }), { virtual: true });
+  SendGridProvider = require('../../src/providers/SendGridProvider').SendGridProvider;
+});
 
 const config = {
   driver: 'sendgrid' as const,
   apiKey: 'SG.test-api-key',
 };
 
-beforeEach(() => jest.clearAllMocks());
-
 describe('SendGridProvider', () => {
-  let SendGridProvider: ReturnType<typeof loadSendGridProvider>;
-
-  beforeAll(() => {
-    SendGridProvider = loadSendGridProvider();
-  });
-
   describe('constructor', () => {
     it('sets the API key on the SendGrid client', () => {
       new SendGridProvider(config);
@@ -39,16 +35,11 @@ describe('SendGridProvider', () => {
   });
 
   describe('send', () => {
-    let provider: InstanceType<typeof SendGridProvider>;
-
-    beforeEach(() => {
-      provider = new SendGridProvider(config);
-    });
-
     it('sends a basic email successfully', async () => {
       mockSend.mockResolvedValue([
         { statusCode: 202, statusMessage: 'Accepted', headers: { 'x-message-id': 'sg-msg-123' } },
       ]);
+      const provider = new SendGridProvider(config);
 
       const result = await provider.send({
         to: 'user@example.com',
@@ -75,6 +66,7 @@ describe('SendGridProvider', () => {
       mockSend.mockResolvedValue([
         { statusCode: 202, headers: { 'x-message-id': 'id' } },
       ]);
+      const provider = new SendGridProvider(config);
 
       await provider.send({
         to: { address: 'user@example.com', name: 'John' },
@@ -95,6 +87,7 @@ describe('SendGridProvider', () => {
       mockSend.mockResolvedValue([
         { statusCode: 202, headers: { 'x-message-id': 'id' } },
       ]);
+      const provider = new SendGridProvider(config);
 
       await provider.send({
         to: ['a@example.com', 'b@example.com'],
@@ -113,6 +106,7 @@ describe('SendGridProvider', () => {
       mockSend.mockResolvedValue([
         { statusCode: 202, headers: { 'x-message-id': 'id' } },
       ]);
+      const provider = new SendGridProvider(config);
 
       await provider.send({
         to: 'user@example.com',
@@ -134,6 +128,7 @@ describe('SendGridProvider', () => {
       mockSend.mockResolvedValue([
         { statusCode: 202, headers: { 'x-message-id': 'id' } },
       ]);
+      const provider = new SendGridProvider(config);
 
       await provider.send({
         to: 'user@example.com',
@@ -155,6 +150,7 @@ describe('SendGridProvider', () => {
       mockSend.mockResolvedValue([
         { statusCode: 202, headers: { 'x-message-id': 'id' } },
       ]);
+      const provider = new SendGridProvider(config);
 
       await provider.send({
         to: 'user@example.com',
@@ -187,6 +183,7 @@ describe('SendGridProvider', () => {
       mockSend.mockResolvedValue([
         { statusCode: 202, headers: { 'x-message-id': 'id' } },
       ]);
+      const provider = new SendGridProvider(config);
 
       await provider.send({
         to: 'user@example.com',
@@ -204,6 +201,7 @@ describe('SendGridProvider', () => {
 
     it('returns error on send failure', async () => {
       mockSend.mockRejectedValue(new Error('Unauthorized'));
+      const provider = new SendGridProvider(config);
 
       const result = await provider.send({
         to: 'user@example.com',
@@ -217,6 +215,7 @@ describe('SendGridProvider', () => {
 
     it('handles non-Error thrown values', async () => {
       mockSend.mockRejectedValue('network failure');
+      const provider = new SendGridProvider(config);
 
       const result = await provider.send({
         to: 'user@example.com',
@@ -232,6 +231,7 @@ describe('SendGridProvider', () => {
       mockSend.mockResolvedValue([
         { statusCode: 202, headers: { 'x-message-id': 'id' } },
       ]);
+      const provider = new SendGridProvider(config);
 
       const result = await provider.send({
         to: 'user@example.com',

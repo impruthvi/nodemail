@@ -1,5 +1,8 @@
 /**
  * SES provider tests
+ *
+ * Uses beforeEach resetModules + doMock to avoid module cache
+ * contamination when running with the full test suite in CI.
  */
 
 const mockSend = jest.fn();
@@ -8,32 +11,25 @@ const MockSESClient = jest.fn().mockImplementation(() => ({
 }));
 const MockSendEmailCommand = jest.fn();
 
-function loadSesProvider() {
-  let SesProvider: typeof import('../../src/providers/SesProvider').SesProvider;
-  jest.isolateModules(() => {
-    jest.doMock('@aws-sdk/client-ses', () => ({
-      SESClient: MockSESClient,
-      SendEmailCommand: MockSendEmailCommand,
-    }), { virtual: true });
-    SesProvider = require('../../src/providers/SesProvider').SesProvider;
-  });
-  return SesProvider!;
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let SesProvider: any;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  jest.resetModules();
+  jest.doMock('@aws-sdk/client-ses', () => ({
+    SESClient: MockSESClient,
+    SendEmailCommand: MockSendEmailCommand,
+  }), { virtual: true });
+  SesProvider = require('../../src/providers/SesProvider').SesProvider;
+});
 
 const config = {
   driver: 'ses' as const,
   region: 'us-east-1',
 };
 
-beforeEach(() => jest.clearAllMocks());
-
 describe('SesProvider', () => {
-  let SesProvider: ReturnType<typeof loadSesProvider>;
-
-  beforeAll(() => {
-    SesProvider = loadSesProvider();
-  });
-
   describe('constructor', () => {
     it('creates SES client with region', () => {
       new SesProvider(config);
@@ -69,14 +65,9 @@ describe('SesProvider', () => {
   });
 
   describe('send', () => {
-    let provider: InstanceType<typeof SesProvider>;
-
-    beforeEach(() => {
-      provider = new SesProvider(config);
-    });
-
     it('sends a basic email successfully', async () => {
       mockSend.mockResolvedValue({ MessageId: 'ses-msg-123' });
+      const provider = new SesProvider(config);
 
       const result = await provider.send({
         to: 'user@example.com',
@@ -110,6 +101,7 @@ describe('SesProvider', () => {
 
     it('formats MailAddress objects', async () => {
       mockSend.mockResolvedValue({ MessageId: 'id' });
+      const provider = new SesProvider(config);
 
       await provider.send({
         to: { address: 'user@example.com', name: 'John' },
@@ -130,6 +122,7 @@ describe('SesProvider', () => {
 
     it('formats multiple recipients', async () => {
       mockSend.mockResolvedValue({ MessageId: 'id' });
+      const provider = new SesProvider(config);
 
       await provider.send({
         to: ['a@example.com', 'b@example.com'],
@@ -148,6 +141,7 @@ describe('SesProvider', () => {
 
     it('passes cc and bcc', async () => {
       mockSend.mockResolvedValue({ MessageId: 'id' });
+      const provider = new SesProvider(config);
 
       await provider.send({
         to: 'user@example.com',
@@ -170,6 +164,7 @@ describe('SesProvider', () => {
 
     it('passes replyTo', async () => {
       mockSend.mockResolvedValue({ MessageId: 'id' });
+      const provider = new SesProvider(config);
 
       await provider.send({
         to: 'user@example.com',
@@ -187,6 +182,7 @@ describe('SesProvider', () => {
 
     it('sends HTML-only body', async () => {
       mockSend.mockResolvedValue({ MessageId: 'id' });
+      const provider = new SesProvider(config);
 
       await provider.send({
         to: 'user@example.com',
@@ -207,6 +203,7 @@ describe('SesProvider', () => {
 
     it('sends text-only body', async () => {
       mockSend.mockResolvedValue({ MessageId: 'id' });
+      const provider = new SesProvider(config);
 
       await provider.send({
         to: 'user@example.com',
@@ -227,6 +224,7 @@ describe('SesProvider', () => {
 
     it('handles missing MessageId in response', async () => {
       mockSend.mockResolvedValue({});
+      const provider = new SesProvider(config);
 
       const result = await provider.send({
         to: 'user@example.com',
@@ -240,6 +238,7 @@ describe('SesProvider', () => {
 
     it('returns error on send failure', async () => {
       mockSend.mockRejectedValue(new Error('Access denied'));
+      const provider = new SesProvider(config);
 
       const result = await provider.send({
         to: 'user@example.com',
@@ -253,6 +252,7 @@ describe('SesProvider', () => {
 
     it('handles non-Error thrown values', async () => {
       mockSend.mockRejectedValue('network issue');
+      const provider = new SesProvider(config);
 
       const result = await provider.send({
         to: 'user@example.com',
