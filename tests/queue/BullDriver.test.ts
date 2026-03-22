@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { BullDriver } from '../../src/queue/drivers/BullDriver';
 import type { QueueConfig, QueuedMailJob } from '../../src/types';
