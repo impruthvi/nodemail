@@ -8,23 +8,17 @@ const MockSESClient = jest.fn().mockImplementation(() => ({
 }));
 const MockSendEmailCommand = jest.fn();
 
-jest.mock('@aws-sdk/client-ses', () => ({
-  SESClient: MockSESClient,
-  SendEmailCommand: MockSendEmailCommand,
-}), { virtual: true });
-
-let SesProvider: typeof import('../../src/providers/SesProvider').SesProvider;
-
-beforeAll(() => {
-  jest.resetModules();
-  // Re-register the mock after resetModules
-  jest.doMock('@aws-sdk/client-ses', () => ({
-    SESClient: MockSESClient,
-    SendEmailCommand: MockSendEmailCommand,
-  }), { virtual: true });
-   
-  SesProvider = require('../../src/providers/SesProvider').SesProvider;
-});
+function loadSesProvider() {
+  let SesProvider: typeof import('../../src/providers/SesProvider').SesProvider;
+  jest.isolateModules(() => {
+    jest.doMock('@aws-sdk/client-ses', () => ({
+      SESClient: MockSESClient,
+      SendEmailCommand: MockSendEmailCommand,
+    }), { virtual: true });
+    SesProvider = require('../../src/providers/SesProvider').SesProvider;
+  });
+  return SesProvider!;
+}
 
 const config = {
   driver: 'ses' as const,
@@ -34,6 +28,12 @@ const config = {
 beforeEach(() => jest.clearAllMocks());
 
 describe('SesProvider', () => {
+  let SesProvider: ReturnType<typeof loadSesProvider>;
+
+  beforeAll(() => {
+    SesProvider = loadSesProvider();
+  });
+
   describe('constructor', () => {
     it('creates SES client with region', () => {
       new SesProvider(config);

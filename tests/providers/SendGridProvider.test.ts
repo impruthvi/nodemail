@@ -5,22 +5,32 @@
 const mockSetApiKey = jest.fn();
 const mockSend = jest.fn();
 
-jest.mock('@sendgrid/mail', () => ({
-  setApiKey: mockSetApiKey,
-  send: mockSend,
-}), { virtual: true });
+function loadSendGridProvider() {
+  let SendGridProvider: typeof import('../../src/providers/SendGridProvider').SendGridProvider;
+  jest.isolateModules(() => {
+    jest.doMock('@sendgrid/mail', () => ({
+      setApiKey: mockSetApiKey,
+      send: mockSend,
+    }), { virtual: true });
+    SendGridProvider = require('../../src/providers/SendGridProvider').SendGridProvider;
+  });
+  return SendGridProvider!;
+}
 
-import { SendGridProvider } from '../../src/providers/SendGridProvider';
-import { SendGridConfig } from '../../src/types';
-
-const config: SendGridConfig = {
-  driver: 'sendgrid',
+const config = {
+  driver: 'sendgrid' as const,
   apiKey: 'SG.test-api-key',
 };
 
 beforeEach(() => jest.clearAllMocks());
 
 describe('SendGridProvider', () => {
+  let SendGridProvider: ReturnType<typeof loadSendGridProvider>;
+
+  beforeAll(() => {
+    SendGridProvider = loadSendGridProvider();
+  });
+
   describe('constructor', () => {
     it('sets the API key on the SendGrid client', () => {
       new SendGridProvider(config);
@@ -29,7 +39,7 @@ describe('SendGridProvider', () => {
   });
 
   describe('send', () => {
-    let provider: SendGridProvider;
+    let provider: InstanceType<typeof SendGridProvider>;
 
     beforeEach(() => {
       provider = new SendGridProvider(config);
