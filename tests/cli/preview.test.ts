@@ -31,11 +31,11 @@ jest.mock('../../src/core/MailManager', () => ({
 }));
 
 import { preview } from '../../src/cli/commands/preview';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+ 
 const { output: mockOutput } = require('../../src/cli/utils/output');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+ 
 const { Spinner: MockSpinner } = require('../../src/cli/utils/output');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+ 
 const { loadConfig: mockLoadConfig } = require('../../src/cli/utils/config-loader');
 
 const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);

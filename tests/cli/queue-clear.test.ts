@@ -24,9 +24,9 @@ jest.mock('../../src/core/MailManager', () => ({
 }));
 
 import { queueClear } from '../../src/cli/commands/queue-clear';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+ 
 const { output: mockOutput } = require('../../src/cli/utils/output');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+ 
 const { loadConfig: mockLoadConfig } = require('../../src/cli/utils/config-loader');
 
 const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);

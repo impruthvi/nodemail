@@ -22,7 +22,7 @@ beforeAll(() => {
     SESClient: MockSESClient,
     SendEmailCommand: MockSendEmailCommand,
   }), { virtual: true });
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
+   
   SesProvider = require('../../src/providers/SesProvider').SesProvider;
 });
 

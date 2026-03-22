@@ -16,7 +16,7 @@ jest.mock('../../src/cli/utils/output', () => ({
 }));
 
 import { makeMailable } from '../../src/cli/commands/make-mailable';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+ 
 const { output: mockOutput } = require('../../src/cli/utils/output');
 
 const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);

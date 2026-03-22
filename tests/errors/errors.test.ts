@@ -197,7 +197,7 @@ describe('Integration — MailManager throws ConfigurationError', () => {
     await expect(mgr.processQueue()).rejects.toThrow(ConfigurationError);
   });
 
-  it('unsupported mail driver', () => {
+  it('unsupported mail driver', async () => {
     expect(() => {
       new MailManager({
         ...baseConfig,
@@ -212,7 +212,7 @@ describe('Integration — MailManager throws ConfigurationError', () => {
       default: 'bad',
       mailers: { bad: { driver: 'nonexistent' as any } },
     });
-    expect(mgr.send({ to: 'a@b.com', subject: 's' })).rejects.toThrow(ConfigurationError);
+    await expect(mgr.send({ to: 'a@b.com', subject: 's' })).rejects.toThrow(ConfigurationError);
   });
 
   it('unconfigured mailer name', () => {

@@ -11,7 +11,7 @@ jest.mock('@sendgrid/mail', () => ({
 }), { virtual: true });
 
 import { SendGridProvider } from '../../src/providers/SendGridProvider';
-import { SendGridConfig, MailOptions } from '../../src/types';
+import { SendGridConfig } from '../../src/types';
 
 const config: SendGridConfig = {
   driver: 'sendgrid',

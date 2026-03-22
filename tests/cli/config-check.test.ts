@@ -38,9 +38,9 @@ jest.mock('../../src/core/MailManager', () => ({
 }));
 
 import { configCheck } from '../../src/cli/commands/config-check';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+ 
 const { output: mockOutput } = require('../../src/cli/utils/output');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+ 
 const { getConfigPath: mockGetConfigPath, loadConfig: mockLoadConfig } = require('../../src/cli/utils/config-loader');
 
 const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
