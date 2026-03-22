@@ -1,8 +1,9 @@
 /**
  * SES provider tests
  *
- * Uses beforeEach resetModules + doMock to avoid module cache
- * contamination when running with the full test suite in CI.
+ * Uses require.resolve to detect if @aws-sdk/client-ses is installed:
+ * - Installed (CI): jest.doMock WITHOUT virtual to override real module
+ * - Not installed (local): jest.doMock WITH virtual to create mock module
  */
 
 const mockSend = jest.fn();
@@ -11,23 +12,33 @@ const MockSESClient = jest.fn().mockImplementation(() => ({
 }));
 const MockSendEmailCommand = jest.fn();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let SesProvider: any;
-
-beforeEach(() => {
-  jest.clearAllMocks();
-  jest.resetModules();
-  jest.doMock('@aws-sdk/client-ses', () => ({
+function mockAwsSdk() {
+  const factory = () => ({
     SESClient: MockSESClient,
     SendEmailCommand: MockSendEmailCommand,
-  }), { virtual: true });
-  SesProvider = require('../../src/providers/SesProvider').SesProvider;
-});
+  });
+  try {
+    require.resolve('@aws-sdk/client-ses');
+    jest.doMock('@aws-sdk/client-ses', factory);
+  } catch {
+    jest.doMock('@aws-sdk/client-ses', factory, { virtual: true });
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let SesProvider: any;
 
 const config = {
   driver: 'ses' as const,
   region: 'us-east-1',
 };
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  jest.resetModules();
+  mockAwsSdk();
+  SesProvider = require('../../src/providers/SesProvider').SesProvider;
+});
 
 describe('SesProvider', () => {
   describe('constructor', () => {

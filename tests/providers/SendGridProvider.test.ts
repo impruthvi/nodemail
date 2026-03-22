@@ -1,30 +1,41 @@
 /**
  * SendGrid provider tests
  *
- * Uses beforeEach resetModules + doMock to avoid module cache
- * contamination when running with the full test suite in CI.
+ * Uses require.resolve to detect if @sendgrid/mail is installed:
+ * - Installed (CI): jest.doMock WITHOUT virtual to override real module
+ * - Not installed (local): jest.doMock WITH virtual to create mock module
  */
 
 const mockSetApiKey = jest.fn();
 const mockSend = jest.fn();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let SendGridProvider: any;
-
-beforeEach(() => {
-  jest.clearAllMocks();
-  jest.resetModules();
-  jest.doMock('@sendgrid/mail', () => ({
+function mockSendGrid() {
+  const factory = () => ({
     setApiKey: mockSetApiKey,
     send: mockSend,
-  }), { virtual: true });
-  SendGridProvider = require('../../src/providers/SendGridProvider').SendGridProvider;
-});
+  });
+  try {
+    require.resolve('@sendgrid/mail');
+    jest.doMock('@sendgrid/mail', factory);
+  } catch {
+    jest.doMock('@sendgrid/mail', factory, { virtual: true });
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let SendGridProvider: any;
 
 const config = {
   driver: 'sendgrid' as const,
   apiKey: 'SG.test-api-key',
 };
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  jest.resetModules();
+  mockSendGrid();
+  SendGridProvider = require('../../src/providers/SendGridProvider').SendGridProvider;
+});
 
 describe('SendGridProvider', () => {
   describe('constructor', () => {
