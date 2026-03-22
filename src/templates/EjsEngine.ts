@@ -1,6 +1,7 @@
 import { TemplateEngine, TemplateEngineOptions } from './TemplateEngine';
 import { readFile } from 'fs/promises';
 import { resolve, extname } from 'path';
+import { ConfigurationError } from '../errors';
 
 /* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any */
 /**
@@ -27,7 +28,7 @@ export class EjsEngine implements TemplateEngine {
     try {
       this.ejs = require('ejs');
     } catch {
-      throw new Error('EJS is not installed. Please install it: npm install ejs');
+      throw new ConfigurationError('EJS is not installed. Please install it: npm install ejs');
     }
   }
 

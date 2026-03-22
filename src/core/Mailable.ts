@@ -5,6 +5,7 @@
 import * as path from 'path';
 import type { MailOptions, MailResponse, PreviewResult } from '../types';
 import type { MailManager } from './MailManager';
+import { ConfigurationError, ValidationError } from '../errors';
 
 export abstract class Mailable {
   protected options: Partial<MailOptions> = {};
@@ -38,11 +39,11 @@ export abstract class Mailable {
    */
   async send(): Promise<MailResponse> {
     if (!this.mailManager) {
-      throw new Error('Mail manager not configured. Use Mail.to().send(mailable) or configure mailable with setMailManager()');
+      throw new ConfigurationError('Mail manager not configured. Use Mail.to().send(mailable) or configure mailable with setMailManager()');
     }
 
     if (!this.recipients || (Array.isArray(this.recipients) && this.recipients.length === 0)) {
-      throw new Error('No recipients specified. Use .to() to set recipients.');
+      throw new ValidationError('No recipients specified. Use .to() to set recipients.', 'to');
     }
 
     const mailOptions = this.getMailOptions();
@@ -57,7 +58,7 @@ export abstract class Mailable {
    */
   async preview(): Promise<PreviewResult> {
     if (!this.mailManager) {
-      throw new Error('Mail manager not configured. Use Mail.preview(mailable) or configure mailable with setMailManager()');
+      throw new ConfigurationError('Mail manager not configured. Use Mail.preview(mailable) or configure mailable with setMailManager()');
     }
 
     const mailOptions = this.getMailOptions();

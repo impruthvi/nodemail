@@ -1,4 +1,5 @@
 import { MailOptions, MailResponse, SesConfig, MailAddress } from '../types';
+import { ConfigurationError } from '../errors';
 
 // AWS SES is a peer dependency - user must install it
 type SESClient = {
@@ -42,7 +43,7 @@ export class SesProvider {
 
   constructor(config: SesConfig) {
     if (!SESClient || !SendEmailCommand) {
-      throw new Error(
+      throw new ConfigurationError(
         'AWS SES provider requires @aws-sdk/client-ses package. Install it with: npm install @aws-sdk/client-ses'
       );
     }

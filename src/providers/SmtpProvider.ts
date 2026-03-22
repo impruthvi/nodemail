@@ -31,6 +31,9 @@ export class SmtpProvider {
             pass: String(config.auth.pass),
           }
         : undefined,
+      pool: config.pool ?? false,
+      maxConnections: config.maxConnections,
+      maxMessages: config.maxMessages,
       ...config.options,
     } as nodemailer.TransportOptions);
   }

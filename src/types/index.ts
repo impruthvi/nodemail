@@ -55,6 +55,9 @@ export interface SmtpConfig extends MailerConfig {
     user: string;
     pass: string;
   };
+  pool?: boolean;
+  maxConnections?: number;
+  maxMessages?: number;
   options?: Record<string, unknown>;
 }
 

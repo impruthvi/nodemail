@@ -5,6 +5,7 @@
 
 import { getDefaultTheme } from './themes/default';
 import type { MarkdownTheme } from './themes/default';
+import { ConfigurationError } from '../errors';
 
 export interface MarkdownRendererOptions {
   theme?: MarkdownTheme;
@@ -31,7 +32,7 @@ export class MarkdownRenderer {
     try {
       this.marked = require('marked');
     } catch {
-      throw new Error(
+      throw new ConfigurationError(
         'marked is not installed. Please install it: npm install marked'
       );
     }
@@ -39,7 +40,7 @@ export class MarkdownRenderer {
     try {
       this.juice = require('juice');
     } catch {
-      throw new Error(
+      throw new ConfigurationError(
         'juice is not installed. Please install it: npm install juice'
       );
     }

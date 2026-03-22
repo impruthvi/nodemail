@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-03-22
+
+### Added
+
+- **Typed Error Classes** — `ConfigurationError`, `ValidationError`, `ProviderError`, `AllProvidersFailedError` replace generic `Error` throws across all source files. Users can now use `instanceof` for granular error handling.
+- **CLI Command Tests** — 65 new tests covering all 8 CLI commands (`config:check`, `send:test`, `make:mailable`, `preview`, `queue:status`, `queue:retry`, `queue:clear`, `queue:work`) and config loader utilities.
+- **Error Class Tests** — 37 tests for typed error hierarchy, instanceof discrimination, and integration with core modules.
+- **SendGrid Provider Tests** — 11 tests covering constructor, send, address formatting, attachments, and error handling.
+- **SES Provider Tests** — 13 tests covering constructor with/without credentials, send, address formatting, and error handling.
+- **SMTP Connection Pooling** — `pool`, `maxConnections`, `maxMessages` options in `SmtpConfig` passed through to nodemailer transport.
+- 129 new tests (774 total across 51 suites)
+
 ## [1.3.0] - 2026-03-15
 
 ### Added

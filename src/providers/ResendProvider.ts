@@ -1,4 +1,5 @@
 import type { MailProvider, MailOptions, MailResponse, MailAddress } from '../types';
+import { ConfigurationError, ValidationError } from '../errors';
 
 /**
  * Resend email provider
@@ -10,7 +11,7 @@ export class ResendProvider implements MailProvider {
 
   constructor(config: { apiKey: string }) {
     if (!config.apiKey) {
-      throw new Error('Resend API key is required');
+      throw new ValidationError('Resend API key is required', 'apiKey');
     }
 
     try {
@@ -20,7 +21,7 @@ export class ResendProvider implements MailProvider {
       this.client = new Resend(config.apiKey);
       /* eslint-enable @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call */
     } catch {
-      throw new Error(
+      throw new ConfigurationError(
         'Resend provider requires "resend" package. ' +
           'Install with: npm install resend',
       );

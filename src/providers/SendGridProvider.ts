@@ -1,4 +1,5 @@
 import { MailOptions, MailResponse, SendGridConfig, MailAddress } from '../types';
+import { ConfigurationError } from '../errors';
 
 // SendGrid is a peer dependency - user must install it
 type SendGridMail = {
@@ -36,7 +37,7 @@ export class SendGridProvider {
 
   constructor(config: SendGridConfig) {
     if (!sendGridMail) {
-      throw new Error(
+      throw new ConfigurationError(
         'SendGrid provider requires @sendgrid/mail package. Install it with: npm install @sendgrid/mail'
       );
     }

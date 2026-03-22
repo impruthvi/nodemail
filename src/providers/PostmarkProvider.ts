@@ -1,4 +1,5 @@
 import type { MailProvider, MailOptions, MailResponse, MailAddress } from '../types';
+import { ConfigurationError, ValidationError } from '../errors';
 
 /**
  * Postmark email provider
@@ -10,7 +11,7 @@ export class PostmarkProvider implements MailProvider {
 
   constructor(config: { serverToken: string }) {
     if (!config.serverToken) {
-      throw new Error('Postmark server token is required');
+      throw new ValidationError('Postmark server token is required', 'serverToken');
     }
 
     try {
@@ -20,7 +21,7 @@ export class PostmarkProvider implements MailProvider {
       this.client = new postmark.ServerClient(config.serverToken);
       /* eslint-enable @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
     } catch {
-      throw new Error(
+      throw new ConfigurationError(
         'Postmark provider requires "postmark" package. ' +
           'Install with: npm install postmark',
       );

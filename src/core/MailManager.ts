@@ -35,6 +35,7 @@ import { PugEngine } from '../templates/PugEngine';
 import { QueueManager } from '../queue/QueueManager';
 import { MarkdownRenderer } from '../markdown/MarkdownRenderer';
 import type { MarkdownRendererOptions } from '../markdown/MarkdownRenderer';
+import { ConfigurationError } from '../errors';
 
 export class MailManager {
   private static customProviders = new Map<string, (config: MailerConfig) => MailProvider>();
@@ -99,7 +100,7 @@ export class MailManager {
           this.templateEngine = new PugEngine(engineOptions);
           break;
         default:
-          throw new Error(`Unsupported template engine: ${engine}`);
+          throw new ConfigurationError(`Unsupported template engine: ${engine}`);
       }
     } else {
       // Custom template engine instance provided
@@ -130,7 +131,7 @@ export class MailManager {
    */
   async queue(options: MailOptions): Promise<QueueJobResult> {
     if (!this.queueManager) {
-      throw new Error('Queue not configured. Add queue configuration to Mail.configure()');
+      throw new ConfigurationError('Queue not configured. Add queue configuration to Mail.configure()');
     }
     return this.queueManager.queue(options);
   }
@@ -140,7 +141,7 @@ export class MailManager {
    */
   async later(options: MailOptions, delaySeconds: number): Promise<QueueJobResult> {
     if (!this.queueManager) {
-      throw new Error('Queue not configured. Add queue configuration to Mail.configure()');
+      throw new ConfigurationError('Queue not configured. Add queue configuration to Mail.configure()');
     }
     return this.queueManager.later(options, delaySeconds);
   }
@@ -150,7 +151,7 @@ export class MailManager {
    */
   async at(options: MailOptions, date: Date): Promise<QueueJobResult> {
     if (!this.queueManager) {
-      throw new Error('Queue not configured. Add queue configuration to Mail.configure()');
+      throw new ConfigurationError('Queue not configured. Add queue configuration to Mail.configure()');
     }
     return this.queueManager.at(options, date);
   }
@@ -160,7 +161,7 @@ export class MailManager {
    */
   async processQueue(queueName?: string): Promise<void> {
     if (!this.queueManager) {
-      throw new Error('Queue not configured. Add queue configuration to Mail.configure()');
+      throw new ConfigurationError('Queue not configured. Add queue configuration to Mail.configure()');
     }
     await this.queueManager.process(async (job) => {
       return this.send(job.mailOptions);
@@ -176,7 +177,7 @@ export class MailManager {
     if (customFactory) {
       const provider = customFactory(mailerConfig);
       if (!provider || typeof provider.send !== 'function') {
-        throw new Error(`Custom provider factory for "${mailerConfig.driver}" must return an object with a send() method`);
+        throw new ConfigurationError(`Custom provider factory for "${mailerConfig.driver}" must return an object with a send() method`);
       }
       return provider;
     }
@@ -197,7 +198,7 @@ export class MailManager {
       case 'log':
         return new LogProvider();
       default:
-        throw new Error(`Unsupported mail driver: ${mailerConfig.driver}`);
+        throw new ConfigurationError(`Unsupported mail driver: ${mailerConfig.driver}`);
     }
   }
 
@@ -208,7 +209,7 @@ export class MailManager {
     const mailerName = name ?? this.config.default;
 
     if (!this.config.mailers[mailerName]) {
-      throw new Error(`Mailer '${mailerName}' is not configured`);
+      throw new ConfigurationError(`Mailer '${mailerName}' is not configured`);
     }
 
     // Check cache first
@@ -217,7 +218,7 @@ export class MailManager {
       // Create and cache new provider
       const mailerConfig = this.config.mailers[mailerName];
       if (!mailerConfig) {
-        throw new Error(`Mailer '${mailerName}' configuration not found`);
+        throw new ConfigurationError(`Mailer '${mailerName}' configuration not found`);
       }
       provider = this.createProvider(mailerConfig);
       this.providers.set(mailerName, provider);
@@ -238,7 +239,7 @@ export class MailManager {
    */
   mailer(name: string) {
     if (!this.config.mailers[name]) {
-      throw new Error(`Mailer '${name}' is not configured`);
+      throw new ConfigurationError(`Mailer '${name}' is not configured`);
     }
 
     // Return a new manager instance that uses this specific mailer as default

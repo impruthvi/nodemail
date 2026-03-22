@@ -1,4 +1,5 @@
 import type { MailProvider, MailOptions, MailResponse, MailAddress } from '../types';
+import { ConfigurationError, ValidationError } from '../errors';
 
 /**
  * Mailgun email provider
@@ -16,11 +17,11 @@ export class MailgunProvider implements MailProvider {
     host?: string;
   }) {
     if (!config.apiKey) {
-      throw new Error('Mailgun API key is required');
+      throw new ValidationError('Mailgun API key is required', 'apiKey');
     }
 
     if (!config.domain) {
-      throw new Error('Mailgun domain is required');
+      throw new ValidationError('Mailgun domain is required', 'domain');
     }
 
     this.domain = config.domain;
@@ -45,7 +46,7 @@ export class MailgunProvider implements MailProvider {
       this.client = mailgun.client(clientOptions);
       /* eslint-enable @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any */
     } catch {
-      throw new Error(
+      throw new ConfigurationError(
         'Mailgun provider requires "mailgun.js" and "form-data" packages. ' +
           'Install with: npm install mailgun.js form-data',
       );

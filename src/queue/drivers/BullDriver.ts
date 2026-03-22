@@ -12,6 +12,7 @@ import type {
   FailedJob,
   MailResponse,
 } from '../../types';
+import { ConfigurationError, ProviderError } from '../../errors';
 
 // Dynamic import types
 type BullQueue = import('bull').Queue;
@@ -37,7 +38,7 @@ export class BullDriver implements QueueDriver {
       const bull = await import('bull');
       this.Bull = bull.default || bull;
     } catch {
-      throw new Error('Bull is not installed. Please install it with: npm install bull');
+      throw new ConfigurationError('Bull is not installed. Please install it with: npm install bull');
     }
   }
 
@@ -176,7 +177,7 @@ export class BullDriver implements QueueDriver {
         const result = await handler(mailJob);
 
         if (!result.success) {
-          throw new Error(result.error || 'Failed to send email');
+          throw new ProviderError(result.error || 'Failed to send email', 'bull-queue');
         }
 
         return result;

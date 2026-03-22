@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { pathToFileURL } from 'url';
 import type { MailConfig } from '../../types';
+import { ConfigurationError } from '../../errors';
 
 export interface LoadedConfig {
   config: MailConfig;
@@ -55,7 +56,7 @@ export async function loadConfig(customPath?: string): Promise<LoadedConfig> {
 
   if (!configPath) {
     const searchedFiles = customPath ? [customPath] : CONFIG_FILES;
-    throw new Error(
+    throw new ConfigurationError(
       `Config file not found. Searched for: ${searchedFiles.join(', ')}\n` +
         'Create a laramail.config.ts or laramail.config.js file in your project root.'
     );
@@ -76,7 +77,7 @@ export async function loadConfig(customPath?: string): Promise<LoadedConfig> {
       const actualConfig = (config['default'] ?? config) as Record<string, unknown>;
 
       if (!actualConfig['default'] || !actualConfig['mailers']) {
-        throw new Error(
+        throw new ConfigurationError(
           'Invalid config format. Config must export a MailConfig object with "default" and "mailers" properties.'
         );
       }
@@ -92,11 +93,11 @@ export async function loadConfig(customPath?: string): Promise<LoadedConfig> {
       configPath,
     };
   } catch (error) {
-    if (error instanceof Error && error.message.includes('Invalid config format')) {
+    if (error instanceof ConfigurationError) {
       throw error;
     }
 
-    throw new Error(
+    throw new ConfigurationError(
       `Failed to load config from ${configPath}: ${error instanceof Error ? error.message : String(error)}\n` +
         'For TypeScript configs, make sure to run the CLI with tsx: npx tsx node_modules/.bin/laramail'
     );

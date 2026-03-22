@@ -21,6 +21,7 @@ import type {
 import type { Mailable } from './Mailable';
 import { MailFake } from '../testing/MailFake';
 import type { AssertableMessage } from '../testing/AssertableMessage';
+import { ConfigurationError } from '../errors';
 
 class MailFacade {
   private static instance: MailManager | null = null;
@@ -40,7 +41,7 @@ class MailFacade {
    */
   private static getInstance(): MailManager {
     if (!this.instance) {
-      throw new Error('Mail not configured. Call Mail.configure() before using Mail facade.');
+      throw new ConfigurationError('Mail not configured. Call Mail.configure() before using Mail facade.');
     }
     return this.instance;
   }
@@ -231,7 +232,7 @@ class MailFacade {
     callback?: (message: AssertableMessage) => boolean
   ): void {
     if (!this.fakeInstance) {
-      throw new Error('Mail::fake() must be called before using assertions.');
+      throw new ConfigurationError('Mail::fake() must be called before using assertions.');
     }
     this.fakeInstance.assertSent(mailableClass, callback);
   }
@@ -244,7 +245,7 @@ class MailFacade {
     count: number
   ): void {
     if (!this.fakeInstance) {
-      throw new Error('Mail::fake() must be called before using assertions.');
+      throw new ConfigurationError('Mail::fake() must be called before using assertions.');
     }
     this.fakeInstance.assertSentCount(mailableClass, count);
   }
@@ -257,7 +258,7 @@ class MailFacade {
     callback?: (message: AssertableMessage) => boolean
   ): void {
     if (!this.fakeInstance) {
-      throw new Error('Mail::fake() must be called before using assertions.');
+      throw new ConfigurationError('Mail::fake() must be called before using assertions.');
     }
     this.fakeInstance.assertNotSent(mailableClass, callback);
   }
@@ -267,7 +268,7 @@ class MailFacade {
    */
   static assertNothingSent(): void {
     if (!this.fakeInstance) {
-      throw new Error('Mail::fake() must be called before using assertions.');
+      throw new ConfigurationError('Mail::fake() must be called before using assertions.');
     }
     this.fakeInstance.assertNothingSent();
   }
@@ -280,7 +281,7 @@ class MailFacade {
     callback?: (message: AssertableMessage) => boolean
   ): void {
     if (!this.fakeInstance) {
-      throw new Error('Mail::fake() must be called before using assertions.');
+      throw new ConfigurationError('Mail::fake() must be called before using assertions.');
     }
     this.fakeInstance.assertQueued(mailableClass, callback);
   }
@@ -293,7 +294,7 @@ class MailFacade {
     count: number
   ): void {
     if (!this.fakeInstance) {
-      throw new Error('Mail::fake() must be called before using assertions.');
+      throw new ConfigurationError('Mail::fake() must be called before using assertions.');
     }
     this.fakeInstance.assertQueuedCount(mailableClass, count);
   }
@@ -306,7 +307,7 @@ class MailFacade {
     callback?: (message: AssertableMessage) => boolean
   ): void {
     if (!this.fakeInstance) {
-      throw new Error('Mail::fake() must be called before using assertions.');
+      throw new ConfigurationError('Mail::fake() must be called before using assertions.');
     }
     this.fakeInstance.assertNotQueued(mailableClass, callback);
   }
@@ -316,7 +317,7 @@ class MailFacade {
    */
   static assertNothingQueued(): void {
     if (!this.fakeInstance) {
-      throw new Error('Mail::fake() must be called before using assertions.');
+      throw new ConfigurationError('Mail::fake() must be called before using assertions.');
     }
     this.fakeInstance.assertNothingQueued();
   }
@@ -328,7 +329,7 @@ class MailFacade {
     mailableClass?: new (...args: any[]) => T
   ): AssertableMessage[] {
     if (!this.fakeInstance) {
-      throw new Error('Mail::fake() must be called before using sent().');
+      throw new ConfigurationError('Mail::fake() must be called before using sent().');
     }
     return this.fakeInstance.sent(mailableClass);
   }
@@ -340,7 +341,7 @@ class MailFacade {
     mailableClass?: new (...args: any[]) => T
   ): AssertableMessage[] {
     if (!this.fakeInstance) {
-      throw new Error('Mail::fake() must be called before using queued().');
+      throw new ConfigurationError('Mail::fake() must be called before using queued().');
     }
     return this.fakeInstance.queued(mailableClass);
   }
@@ -350,7 +351,7 @@ class MailFacade {
    */
   static hasSent(): boolean {
     if (!this.fakeInstance) {
-      throw new Error('Mail::fake() must be called before using hasSent().');
+      throw new ConfigurationError('Mail::fake() must be called before using hasSent().');
     }
     return this.fakeInstance.hasSent();
   }
@@ -360,7 +361,7 @@ class MailFacade {
    */
   static hasQueued(): boolean {
     if (!this.fakeInstance) {
-      throw new Error('Mail::fake() must be called before using hasQueued().');
+      throw new ConfigurationError('Mail::fake() must be called before using hasQueued().');
     }
     return this.fakeInstance.hasQueued();
   }

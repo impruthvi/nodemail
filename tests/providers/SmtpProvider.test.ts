@@ -50,7 +50,68 @@ describe('SmtpProvider', () => {
           user: 'test@test.com',
           pass: 'password123',
         },
+        pool: false,
+        maxConnections: undefined,
+        maxMessages: undefined,
       });
+    });
+
+    it('should create pooled transporter when pool is enabled', () => {
+      const poolConfig: SmtpConfig = {
+        driver: 'smtp',
+        host: 'smtp.test.com',
+        port: 587,
+        secure: false,
+        auth: { user: 'test@test.com', pass: 'password123' },
+        pool: true,
+        maxConnections: 10,
+        maxMessages: 200,
+      };
+
+      new SmtpProvider(poolConfig);
+
+      expect(nodemailer.createTransport).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pool: true,
+          maxConnections: 10,
+          maxMessages: 200,
+        })
+      );
+    });
+
+    it('should default pool to false when not specified', () => {
+      const configNoPool: SmtpConfig = {
+        driver: 'smtp',
+        host: 'smtp.test.com',
+        port: 587,
+      };
+
+      new SmtpProvider(configNoPool);
+
+      expect(nodemailer.createTransport).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pool: false,
+        })
+      );
+    });
+
+    it('should pass pool config without maxConnections/maxMessages', () => {
+      const poolOnlyConfig: SmtpConfig = {
+        driver: 'smtp',
+        host: 'smtp.test.com',
+        port: 587,
+        pool: true,
+      };
+
+      new SmtpProvider(poolOnlyConfig);
+
+      expect(nodemailer.createTransport).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pool: true,
+          maxConnections: undefined,
+          maxMessages: undefined,
+        })
+      );
     });
 
     it('should handle config without auth', () => {

@@ -13,6 +13,7 @@ import type {
   MailOptions,
   MailResponse,
 } from '../types';
+import { ConfigurationError } from '../errors';
 
 export class QueueManager {
   private driver: QueueDriver | null = null;
@@ -48,7 +49,7 @@ export class QueueManager {
         break;
       default:
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        throw new Error(`Unsupported queue driver: ${this.config.driver}`);
+        throw new ConfigurationError(`Unsupported queue driver: ${this.config.driver}`);
     }
 
     this.initialized = true;
@@ -227,7 +228,7 @@ export class QueueManager {
   ): Promise<number> {
     const driver = await this.getDriver();
     if (!driver.clear) {
-      throw new Error('Queue driver does not support clearing jobs');
+      throw new ConfigurationError('Queue driver does not support clearing jobs');
     }
     return driver.clear(status, queueName || this.config.defaultQueue);
   }
@@ -238,7 +239,7 @@ export class QueueManager {
   async retryFailedJobs(queueName?: string): Promise<number> {
     const driver = await this.getDriver();
     if (!driver.retryFailed) {
-      throw new Error('Queue driver does not support retrying failed jobs');
+      throw new ConfigurationError('Queue driver does not support retrying failed jobs');
     }
     return driver.retryFailed(queueName || this.config.defaultQueue);
   }

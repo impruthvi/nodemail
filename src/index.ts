@@ -35,6 +35,15 @@ export type { MarkdownRendererOptions, MarkdownTheme } from './markdown';
 export { MailFake, AssertableMessage } from './testing';
 export type { SentMessage } from './testing';
 
+// Errors
+export {
+  NodeMailError,
+  ConfigurationError,
+  ValidationError,
+  ProviderError,
+  AllProvidersFailedError,
+} from './errors';
+
 // Types
 export * from './types';
 

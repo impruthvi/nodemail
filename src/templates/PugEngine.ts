@@ -1,5 +1,6 @@
 import { TemplateEngine, TemplateEngineOptions } from './TemplateEngine';
 import { resolve, extname } from 'path';
+import { ConfigurationError } from '../errors';
 
 /* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any */
 /**
@@ -26,7 +27,7 @@ export class PugEngine implements TemplateEngine {
     try {
       this.pug = require('pug');
     } catch {
-      throw new Error('Pug is not installed. Please install it: npm install pug');
+      throw new ConfigurationError('Pug is not installed. Please install it: npm install pug');
     }
   }
 

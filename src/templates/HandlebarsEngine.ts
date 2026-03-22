@@ -1,6 +1,7 @@
 import { TemplateEngine, TemplateEngineOptions } from './TemplateEngine';
 import { readFile } from 'fs/promises';
 import { resolve, extname } from 'path';
+import { ConfigurationError } from '../errors';
 
 /**
  * Handlebars Template Engine
@@ -27,7 +28,7 @@ export class HandlebarsEngine implements TemplateEngine {
     try {
       this.handlebars = require('handlebars');
     } catch {
-      throw new Error(
+      throw new ConfigurationError(
         'Handlebars is not installed. Please install it: npm install handlebars'
       );
     }

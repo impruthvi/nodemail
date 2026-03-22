@@ -14,6 +14,7 @@ import type {
 import type { Mailable } from './Mailable';
 import type { MailManager } from './MailManager';
 import { MailFake } from '../testing/MailFake';
+import { ValidationError } from '../errors';
 
 export class MessageBuilder {
   public options: Partial<MailOptions> = {};
@@ -134,7 +135,7 @@ export class MessageBuilder {
       }
 
       if (!this.options.subject) {
-        throw new Error('Email subject is required');
+        throw new ValidationError('Email subject is required', 'subject');
       }
 
       return this.manager.send(this.options as MailOptions);
@@ -152,7 +153,7 @@ export class MessageBuilder {
     }
 
     if (!this.options.subject) {
-      throw new Error('Email subject is required');
+      throw new ValidationError('Email subject is required', 'subject');
     }
 
     return realManager.send(this.options as MailOptions);
@@ -177,7 +178,7 @@ export class MessageBuilder {
         );
       } else {
         if (!this.options.subject) {
-          throw new Error('Email subject is required');
+          throw new ValidationError('Email subject is required', 'subject');
         }
         await this.manager.queue(this.options as MailOptions);
       }
@@ -203,7 +204,7 @@ export class MessageBuilder {
         );
       } else {
         if (!this.options.subject) {
-          throw new Error('Email subject is required');
+          throw new ValidationError('Email subject is required', 'subject');
         }
         await this.manager.later(this.options as MailOptions, delaySeconds);
       }
@@ -229,7 +230,7 @@ export class MessageBuilder {
         );
       } else {
         if (!this.options.subject) {
-          throw new Error('Email subject is required');
+          throw new ValidationError('Email subject is required', 'subject');
         }
         await this.manager.at(this.options as MailOptions, date);
       }
@@ -257,7 +258,7 @@ export class MessageBuilder {
     }
 
     if (!this.options.subject) {
-      throw new Error('Email subject is required');
+      throw new ValidationError('Email subject is required', 'subject');
     }
 
     return this.options as MailOptions;

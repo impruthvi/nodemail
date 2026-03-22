@@ -12,6 +12,7 @@ import type {
   FailedJob,
   MailResponse,
 } from '../../types';
+import { ConfigurationError, ProviderError } from '../../errors';
 
 // Dynamic import types
 type BullMQQueue = import('bullmq').Queue;
@@ -40,7 +41,7 @@ export class BullMQDriver implements QueueDriver {
       this.Queue = bullmq.Queue;
       this.Worker = bullmq.Worker;
     } catch {
-      throw new Error(
+      throw new ConfigurationError(
         'BullMQ is not installed. Please install it with: npm install bullmq ioredis'
       );
     }
@@ -185,7 +186,7 @@ export class BullMQDriver implements QueueDriver {
           const result = await handler(mailJob);
 
           if (!result.success) {
-            throw new Error(result.error || 'Failed to send email');
+            throw new ProviderError(result.error || 'Failed to send email', 'bullmq-queue');
           }
 
           return result;
