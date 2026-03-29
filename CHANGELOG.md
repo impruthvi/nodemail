@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.2] - 2026-03-30
+
+### Changed
+
+- **Badge URLs** — fixed README badges pointing to old `nodemail.impruthvi.me` domain, now correctly point to `laramail.impruthvi.me`.
+- **Comparison table** — trimmed to 8 defensible rows where laramail genuinely wins; removed rows that could mislead developers familiar with nodemailer (template engines, TypeScript support).
+- **npm keywords** — added `email-testing`, `mail-testing`, `nodemailer-mock`, `fake-mailer`, `test-email` for better npm search discovery.
+
 ## [1.4.1] - 2026-03-30
 
 ### Changed

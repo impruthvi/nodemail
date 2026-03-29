@@ -3,9 +3,9 @@
 [![npm version](https://badge.fury.io/js/laramail.svg)](https://www.npmjs.com/package/laramail)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnodemail.impruthvi.me%2Fstats.json&query=%24.tests&label=tests&suffix=%20passing&color=brightgreen)](https://github.com/impruthvi/laramail)
-[![Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnodemail.impruthvi.me%2Fstats.json&query=%24.coverage&label=coverage&suffix=%25&color=brightgreen)](https://github.com/impruthvi/laramail)
-[![Documentation](https://img.shields.io/badge/docs-laramail-blue)](https://nodemail.impruthvi.me/)
+[![Tests](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Flaramail.impruthvi.me%2Fstats.json&query=%24.tests&label=tests&suffix=%20passing&color=brightgreen)](https://github.com/impruthvi/laramail)
+[![Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Flaramail.impruthvi.me%2Fstats.json&query=%24.coverage&label=coverage&suffix=%25&color=brightgreen)](https://github.com/impruthvi/laramail)
+[![Documentation](https://img.shields.io/badge/docs-laramail-blue)](https://laramail.impruthvi.me/)
 
 **AdonisJS mailer, but framework-agnostic — works with Express, Fastify, or any Node.js app.**
 
@@ -22,21 +22,14 @@ Mail.assertSent(WelcomeEmail, (mail) => mail.hasTo('user@example.com'));
 
 | Feature | laramail | nodemailer | @sendgrid/mail | resend |
 |---------|:--------:|:----------:|:--------------:|:------:|
-| Multi-provider support | 6 built-in | SMTP only | SendGrid only | Resend only |
-| Switch provider via config | Yes | No | No | No |
-| Provider failover | Auto chain | No | No | No |
-| Mailable classes | Laravel-style | No | No | No |
-| `Mail.fake()` testing | Yes | No | No | No |
-| Template engines | HBS, EJS, Pug | No | Limited | No |
-| Markdown emails | Components | No | No | No |
-| Queue support | Bull / BullMQ | No | No | No |
-| Rate limiting | Sliding window | No | No | No |
-| Email events | Hooks | No | No | No |
-| Log transport | Built-in | No | No | No |
-| Custom providers | `Mail.extend()` | No | No | No |
-| Staging redirect | `Mail.alwaysTo()` | No | No | No |
-| CLI tools | 8 commands | No | No | No |
-| TypeScript | First-class | @types needed | Yes | Yes |
+| `Mail.fake()` + `Mail.assertSent()` | ✅ | ❌ | ❌ | ❌ |
+| Mailable classes (OOP email objects) | ✅ | ❌ | ❌ | ❌ |
+| Switch provider via `MAIL_DRIVER` env | ✅ | ❌ | ❌ | ❌ |
+| Provider failover (auto chain) | ✅ | ❌ | ❌ | ❌ |
+| Queue support (Bull / BullMQ) | ✅ | ❌ | ❌ | ❌ |
+| Rate limiting (sliding window) | ✅ | ❌ | ❌ | ❌ |
+| Staging redirect (`Mail.alwaysTo()`) | ✅ | ❌ | ❌ | ❌ |
+| Works with Express, Fastify, any framework | ✅ | ✅ | ✅ | ✅ |
 
 ## Installation
 
@@ -421,7 +414,7 @@ MIT © [Pruthvi](https://github.com/impruthvi)
 
 ## Support
 
-- [Documentation](https://nodemail.impruthvi.me/)
+- [Documentation](https://laramail.impruthvi.me/)
 - [GitHub Issues](https://github.com/impruthvi/laramail/issues)
 - [GitHub Discussions](https://github.com/impruthvi/laramail/discussions)
 
