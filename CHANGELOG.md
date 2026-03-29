@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-03-30
+
+### Changed
+
+- **README hero** — repositioned around `Mail.fake()` + zero-setup email testing as the headline feature. "AdonisJS mailer, but framework-agnostic" is now the one-line pitch. Provider switching moves to second paragraph.
+- **npm description** — updated to lead with `Mail.fake()` + `Mail.assertSent()` for zero-setup email testing.
+
 ## [1.4.0] - 2026-03-22
 
 ### Added

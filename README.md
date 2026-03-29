@@ -7,13 +7,15 @@
 [![Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnodemail.impruthvi.me%2Fstats.json&query=%24.coverage&label=coverage&suffix=%25&color=brightgreen)](https://github.com/impruthvi/laramail)
 [![Documentation](https://img.shields.io/badge/docs-laramail-blue)](https://nodemail.impruthvi.me/)
 
-**Laravel's elegant Mail system, reimagined for Node.js/TypeScript.**
+**AdonisJS mailer, but framework-agnostic — works with Express, Fastify, or any Node.js app.**
 
-Switch providers with one config change. Test with `Mail.fake()`. Send with `Mail.to(user).send(new WelcomeEmail())`.
+Test emails without Mailtrap or mocking setup. Switch providers with one env var. Send with `Mail.to(user).send(new WelcomeEmail())`.
 
 ```typescript
-// That's it. Same API whether you use SMTP, SendGrid, SES, Mailgun, Resend, or Postmark.
+// Zero-setup email testing — no SMTP server, no network, no mocks.
+Mail.fake();
 await Mail.to('user@example.com').send(new WelcomeEmail(user));
+Mail.assertSent(WelcomeEmail, (mail) => mail.hasTo('user@example.com'));
 ```
 
 ## How laramail Compares
