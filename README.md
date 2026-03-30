@@ -132,9 +132,32 @@ it('sends welcome email', async () => {
 });
 ```
 
-**Available assertions:** `assertSent`, `assertSentCount`, `assertNotSent`, `assertNothingSent`, `assertQueued`, `assertNothingQueued`, `simulateFailures`, `resetFailures`
+**Assertions:**
 
-**AssertableMessage methods:** `hasTo`, `hasCc`, `hasBcc`, `hasSubject`, `subjectContains`, `htmlContains`, `textContains`, `hasAttachment`, `hasPriority`, `hasHeader`, `isMarkdown`, `wasFailoverUsed`, `getProvider`
+| Method | What it checks |
+|--------|---------------|
+| `Mail.assertSent(Klass)` | Class was sent at least once |
+| `Mail.assertSent(Klass, fn)` | Class was sent and `fn` returns true for at least one message |
+| `Mail.assertSentCount(Klass, n)` | Class was sent exactly N times |
+| `Mail.assertNotSent(Klass)` | Class was NOT sent |
+| `Mail.assertNothingSent()` | No emails sent at all |
+
+**AssertableMessage helpers** (use inside the `fn` callback):
+
+| Method | What it checks |
+|--------|---------------|
+| `hasTo(email)` | Recipient address |
+| `hasCc(email)` | CC recipient |
+| `hasBcc(email)` | BCC recipient |
+| `hasSubject(subject)` | Exact subject match |
+| `subjectContains(text)` | Subject partial match (case-insensitive) |
+| `htmlContains(text)` | HTML body content |
+| `textContains(text)` | Plain text content |
+| `hasAttachment(filename)` | Attachment by filename |
+| `hasPriority(level)` | `'high'`, `'normal'`, or `'low'` |
+| `hasHeader(name, value?)` | Email header |
+
+Full API including queue assertions → [docs/testing.md](./docs/testing.md)
 
 ## Template Engines
 

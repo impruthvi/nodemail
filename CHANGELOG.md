@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.3] - 2026-03-30
+
+### Added
+
+- **`laramail/testing` subpath export** — import testing utilities from `laramail/testing` to keep fake mode out of production bundles. Works with all TypeScript `moduleResolution` settings (`node`, `NodeNext`, `bundler`).
+
+  ```typescript
+  // In test files
+  import { MailFake, AssertableMessage } from 'laramail/testing';
+
+  // Or continue using Mail.fake() from the main import — both work
+  import { Mail } from 'laramail';
+  Mail.fake();
+  ```
+
 ## [1.4.2] - 2026-03-30
 
 ### Changed

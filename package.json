@@ -1,9 +1,24 @@
 {
   "name": "laramail",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Laravel-style mailer for Node.js — Mail.fake() + Mail.assertSent() for zero-setup email testing, provider switching via env var, works with Express/Fastify/any framework.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "default": "./dist/testing/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "testing": ["./dist/testing/index.d.ts"]
+    }
+  },
   "bin": {
     "laramail": "./dist/cli/index.js"
   },
